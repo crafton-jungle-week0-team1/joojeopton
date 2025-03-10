@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Document</title>
+</head>
+<body>
+    <h1 class="text-3xl font-bold text-blue-600">Hello, Tailwind!</h1>
+    <div class="container grid grid-cols-2 divide-x-2">
+        <div class="container profile p-10 grid grid-cols-2 gap-4 content-center">
+            <div class="profile">
+                <img src="{{ profile_url }}" alt="profile_img">
+            </div>
+            <div class="container">
+                <div class="keywords">
+                <span>#뭔들</span>
+                <span>#잘생김</span>
+                <span>#친절함</span>
+                <span>#다정함</span>
+                <span>#멋짐</span>
+                <span>#사랑스러움</span>
+            </div>
+                <button class="bg-sky-500 hover:bg-sky-700 rounded-md p-1">주접떨기</button>
+            </div>
+
+            <div class="result">
+                동석 때문에 전쟁 났어요. 아름다워(war), 귀여워(war), 사랑스러워(war)
+            </div>
+            <button class="bg-sky-500 hover:bg-sky-700 rounded-md p-1">주접 저장하기</button>
+           
+
+        </div>
+        <div class="container list p-5">
+            <div class="joojeop-block border m-5 p-5">
+                <p class="joojeop-content">대한민국, 동석 보유국</p>
+                <span class="joojeop-creater">by 작성자</span>
+                <span class="joojeop-date">2025.05.03</span>
+                <span class="joojeop-likes">likes</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>{{ title }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+    <h1 class="text-3xl font-bold text-blue-600">Hello, Tailwind!</h1>
+    <div class="container grid grid-cols-2 divide-x-2">
+        <div class="container profile p-10 grid grid-cols-4 gap-4">
+            <!-- 프로필 예시 -->
+            <div class="profile">
+                <img src="{{ profile_url }}" alt="profile_img">
+                <button class="bg-sky-500 hover:bg-sky-700 rounded-md p-1">주접떨기</button>
+            </div>
+
+        </div>
+        <div class="container joojeop-list p-5">
+            <!-- 주접문 블록 예시 -->
+            <div class="joojeop border m-5 p-5">
+                <p class="title">대한민국, 동석 보유국</p>
+                <span>by 작성자</span>
+                <span>2025.05.03</span>
+                <span>likes</span>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
