@@ -8,11 +8,12 @@ os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # HTTP에서도 사용 가능�
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def home():
     img_url = url_for('static', filename='images/profile_test.png')
     return render_template("index.html", profile_url=img_url)
-@app.route('/joojeop')
+
+@app.route('/joojeop', methods=['GET'])
 def joojeop():
     img_url = url_for('static', filename='images/profile_test.png')
     return render_template("joojeop.html", profile_url=img_url)
