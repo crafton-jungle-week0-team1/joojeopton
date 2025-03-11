@@ -100,6 +100,14 @@ def joojeop(coach_name, sort_order):
     return render_template("joojeop.html", coach=coach, joojeops=joojeops)
 
 
+@app.route('/joojeop/<joojeop_id>/like', methods=['POST'])
+def like(joojeop_id):
+    # 클라이언트에서 선택한 주접의 id를 받아오기
+    # 해당 주접의 like 수를 1 증가시키기
+    like_joojeop(int(joojeop_id))
+    return redirect(url_for("home"))
+
+
 def sort_joojoeps(order='newest', joojeops=joojeops):
     if order == 'newest':
         return sorted(joojeops, key=lambda x: x['date'], reverse=True)
@@ -312,6 +320,10 @@ def get_joojeops_by_coach_name(order, coach_name, limit=None):
     if limit:
         sorted_joojeops = sorted_joojeops[:limit]
 
+    # id를 string으로 변환
+    for joojeop in sorted_joojeops:
+        joojeop['id'] = str(joojeop['id'])
+
     return sorted_joojeops
 
 
@@ -335,6 +347,10 @@ def get_joojeops_by_author_id(author_id, order='newest', limit=None):
 
     if limit:
         sorted_joojeops = sorted_joojeops[:limit]
+
+    # id를 string으로 변환
+    for joojeop in sorted_joojeops:
+        joojeop['id'] = str(joojeop['id'])
 
     return sorted_joojeops
 
@@ -362,6 +378,10 @@ def get_joojeops(order='newest', limit=None):
 
     if limit:
         sorted_joojeops = sorted_joojeops[:limit]
+
+    # id를 string으로 변환
+    for joojeop in sorted_joojeops:
+        joojeop['id'] = str(joojeop['id'])
 
     return sorted_joojeops
 
