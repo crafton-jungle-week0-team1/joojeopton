@@ -11,6 +11,7 @@
 
     <script>
         $(document).ready(function () {
+            console.log("ready!");
             let selectedKeyword = '';
             $('.keyword-btn').on('click', function () {
                 selectedKeyword = $(this).text().trim();
@@ -22,22 +23,22 @@
             });
             let coachName = "{{ coach.name }}";
             let sortOrder = "{{ sort_order }}";
-            $('form').on('submit', function () {
+            $('form').on('submit', function (e) {
                 if (!selectedKeyword) {
                     alert("키워드를 하나 이상 선택해주세요!");
-                    e.preventDefault(); // 폼 전송 중단
+                    //e.preventDefault(); // 폼 전송 중단
                     return false;
                 }
                 this.action = `/joojeop/${coachName}/${sortOrder}/${encodeURIComponent(selectedKeyword)}/generate`;
             });
 
-            $('.save-btn').on('click', function () {
+            $('.save-btn').on('click', function (e) {
+                e.preventDefault();
                 let content = $('.result').text();
                 $.post(`/joojeop/${encodeURIComponent(coachName)}/${sortOrder}/save`, {
                     content: content
                 }, function (data) {
-                    alert("저장성공!");
-                    console.log(data);
+                    location.reload();
                 });
             });
         });
