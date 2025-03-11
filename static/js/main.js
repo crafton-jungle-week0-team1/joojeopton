@@ -11,13 +11,5 @@ $(document).ready(function () {
             $('#dropdownMenu').addClass('hidden');
         }
     });
-    $('#myButton').on('click', function () {
-        $.ajax({
-            type: "GET",
-            url: "/joojeop",
-            success: function (response) {
-                window.location.href = "/joojeop";
-            }
-        });
-    });
+
 });
