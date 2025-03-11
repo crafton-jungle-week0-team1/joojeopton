@@ -41,6 +41,8 @@ app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET")
 joojeops = [{"id": 1, "content": "김정민 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi", "author_id": '2344', "date": "2021-07-01", "like": 3, "coach_name": "김정민"},
             {"id": 2, "content": "김현수 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi",
                 "author_id": '2344', "date": "2021-07-01", "like": 3, "coach_name": "김현수"},
+            {"id": 9, "content": "김현수 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi",
+                "author_id": '2344', "date": "2021-04-01", "like": 10, "coach_name": "김현수"},
             {"id": 3, "content": "방효식 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi",
                 "author_id": '2344', "date": "2021-07-01", "like": 3, "coach_name": "방효식"},
             {"id": 4, "content": "백승현 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi",
@@ -54,28 +56,8 @@ joojeops = [{"id": 1, "content": "김정민 좋아하지마\n그거 어떻게하
             {"id": 8, "content": "이승민 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi", "author_id": '2344', "date": "2021-07-01", "like": 3, "coach_name": "이승민"}]
 
 
-@app.context_processor
-def utility_processor():
-    """
-    템플릿에서 바로 사용할 수 있는 함수 `for_url` 등록
-    """
-    def for_url(endpoint, **kwargs):
-        """
-        1) 현재 request.args(기존 쿼리 파라미터)를 dict로 변환
-        2) kwargs(새로 지정할 파라미터)로 update
-        3) url_for(...)로 최종 URL 생성
-        """
-        current_args = request.args.to_dict()  # 현재 쿼리스트링을 dict로
-        # kwargs에 같은 key가 있다면 덮어쓰게 됨
-        current_args.update(kwargs)
-        return url_for(endpoint, **current_args)
-
-    return dict(for_url=for_url)
-
 # 맨 처음 접속하면 띄워지는 페이지. 모든 코치진의 사진과 이름을 보여준다.
 # 각 코치진을 클릭하면 그 코치의 주접을 볼 수 있는 페이지로 넘어간다.
-
-
 @app.route('/', methods=['GET'])
 def home():
     user_id = decode_jwt_from_cookie()
@@ -106,16 +88,18 @@ def login():
     return render_template("login.html")
 
 
-@app.route('/joojeop/<coach_name>/<sorting>', methods=['GET'])
-def joojeop(coach_name):
-    # 클라이언트에서 선택한 코치 이름 받아오기 -> path variable로 수정
-    coach_name = request.args.get('coach_name')
-    sorting = request.args.get('sorting')
+@app.route('/joojeop/<coach_name>/<sort_order>', methods=['GET'])
+def joojeop(coach_name, sort_order):
+    # 클라이언트에서 선택한 코치 이름 path variable로 받아오기
 
     # 코치 딕셔너리 생성
     coach = {"name": coach_name, "path": f"images/{coach_name}.png"}
     # 해당 코치의 주접 리스트만 표현하도록 업데이트
-    sorted_joojeops = get_joojeops_by_coach_name(sorting, coach_name)
+    filtered_joojeops = [
+        joojeop for joojeop in joojeops if joojeop["coach_name"] == coach_name]
+
+    sorted_joojeops = sort_joojoeps(
+        order=sort_order, joojeops=filtered_joojeops)
     # 코치 데이터 템플릿에 넘겨주기
     return render_template("joojeop.html", coach=coach, joojeops=sorted_joojeops)
 
