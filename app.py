@@ -102,7 +102,6 @@ def joojeop(coach_name, sort_order):
     coach = {"name": coach_name, "path": f"images/{coach_name}.png"}
     # 해당 코치의 주접 리스트만 표현하도록 업데이트
     joojeops = get_joojeops_by_coach_name(coach_name, sort_order)
-    print("joojeop")
     # get content from query string if exists
     content = request.args.get('content', '')
 
@@ -116,15 +115,6 @@ def like(joojeop_id):
     # 해당 주접의 like 수를 1 증가시키기
     like_joojeop(int(joojeop_id))
     return redirect(url_for("home"))
-
-
-def sort_joojoeps(order='newest', joojeops=joojeops):
-    if order == 'newest':
-        return sorted(joojeops, key=lambda x: x['date'], reverse=True)
-    elif order == 'like':
-        return sorted(joojeops, key=lambda x: x['like'], reverse=True)
-    elif order == 'oldest':
-        return sorted(joojeops, key=lambda x: x['date'], reverse=False)
 
 
 @app.route("/google")  # ✅ Google 로그인 처리
