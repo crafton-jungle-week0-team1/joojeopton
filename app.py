@@ -6,10 +6,17 @@ from flask_dance.contrib.github import make_github_blueprint, github
 import jwt
 import gpt
 from pymongo import MongoClient
+from flask_apscheduler import APScheduler
+import slack
 
 client = MongoClient("mongodb://localhost:27017/")
 db = client.jujeopton
 app = Flask(__name__)
+app.config['SCHEDULER_API_ENABLED'] = True
+
+scheduler = APScheduler()
+scheduler.init_app(app)
+scheduler.start()
 
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # HTTP에서도 사용 가능하도록 설정
@@ -96,9 +103,8 @@ def joojeop(coach_name, sort_order):
     # 해당 코치의 주접 리스트만 표현하도록 업데이트
     joojeops = get_joojeops_by_coach_name(coach_name, sort_order)
 
-    #get content from query string if exists
+    # get content from query string if exists
     content = request.args.get('content', None)
-
 
     # 코치 데이터 템플릿에 넘겨주기
     return render_template("joojeop.html", coach=coach, joojeops=joojeops, sort_order=sort_order, content=content)
@@ -226,7 +232,7 @@ def generate_joojeop(coach_name, sort_order):
     print(content)
     # Save the joojeop here if needed
     # save_joojeop(user_id, user_name, coach_name, content)
-    
+
     return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order, content=content))
 
 
@@ -300,6 +306,8 @@ def like_joojeop(joojeop_id):
     if joojeop:
         db.joojeops.update_one({"id": joojeop_id}, {"$inc": {"like": 1}})
         return True
+
+
 def get_joojeops_by_coach_name(coach_name, order='newest', limit=None):
     """
     주어진 coach_name의 모든 주접을 가져와서 정렬하여 반환하는 함수
@@ -392,6 +400,40 @@ def get_joojeops(order='newest', limit=None):
         joojeop['id'] = str(joojeop['id'])
 
     return sorted_joojeops
+
+
+def get_today_joojeops_by_coach_name(coach_name):
+    """
+    오늘 작성된 주접들을 코치 이름을 입력받아 좋아요 순으로 반환하고, 10개까지만 반환하는 함수
+    """
+    today = datetime.datetime.now().strftime("%Y-%m-%d")
+    query = {"coach_name": coach_name, "date": today}
+    joojeops = list(db.joojeops.find(query))
+
+    sorted_joojeops = sorted(joojeops, key=lambda x: x['like'], reverse=True)
+    top_10_joojeops = sorted_joojeops[:10]
+
+    # id를 string으로 변환
+    for joojeop in top_10_joojeops:
+        joojeop['id'] = str(joojeop['id'])
+
+    return top_10_joojeops
+
+
+def make_joojeop_message_for_coach(coach_name):
+    list = get_today_joojeops_by_coach_name(coach_name, order='like', limit=10)
+    message = f"{coach_name}님에게 온 주접입니다 !!\n-----------------------------------------\n"
+    for joojeop in list:
+        message += f"{joojeop['content']} | 작성자 : {joojeop['author_name']} | {joojeop['like']}개\n"
+    return message
+
+
+def scheduled_job():
+    slack.send_slack_message(make_joojeop_message_for_coach("이동석"))
+
+
+scheduler.add_job(id="scheduled_job", func=scheduled_job,
+                  trigger="cron", hour=23, minute=0)
 
 
 if __name__ == '__main__':

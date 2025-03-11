@@ -24,3 +24,9 @@ def send_slack_message(message):
 
     except SlackApiError as e:
         logger.error(f"Error posting message: {e}")
+
+
+# if __name__ == '__main__':
+#     message = input("메시지를 입력하세요: ")
+#     send_slack_message(message)
+#     print("메시지 전송 완료!")
