@@ -4,6 +4,7 @@ from flask import Flask, redirect, request, jsonify, render_template, url_for
 from flask_dance.contrib.google import make_google_blueprint, google
 from flask_dance.contrib.github import make_github_blueprint, github
 import jwt
+import gpt
 from pymongo import MongoClient
 
 client = MongoClient("mongodb://localhost:27017/")
@@ -76,7 +77,7 @@ def home():
     ]
     if user:
         order = request.args.get('order', 'newest')  # 기본값 newest
-        sorted_joojeops = sort_joojoeps(order=order)
+        sorted_joojeops = get_joojeops(order)
         return render_template("index.html", user=user, coaches=coaches, joojeops=sorted_joojeops)
     else:
         return redirect(url_for("login"))
@@ -94,12 +95,9 @@ def joojeop(coach_name, sort_order):
     # 코치 딕셔너리 생성
     coach = {"name": coach_name, "path": f"images/{coach_name}.png"}
     # 해당 코치의 주접 리스트만 표현하도록 업데이트
-    filtered_joojeops = [
-        joojeop for joojeop in joojeops if joojeop["coach_name"] == coach_name]
-
-    sorted_joojeops = sort_joojoeps(order=sort_order, joojeops=filtered_joojeops)
+    joojeops = get_joojeops_by_coach_name(coach_name, sort_order)
     # 코치 데이터 템플릿에 넘겨주기
-    return render_template("joojeop.html", coach=coach, joojeops=sorted_joojeops)
+    return render_template("joojeop.html", coach=coach, joojeops=joojeops)
 
 
 def sort_joojoeps(order='newest', joojeops=joojeops):
@@ -201,6 +199,21 @@ def github_login():
     return "GitHub 로그인 실패", 403
 
 
+@app.route("/logout")  # ✅ 로그아웃 처리
+def logout():
+    response = redirect(url_for("login"))
+    response.set_cookie("jwt", "", expires=0)
+    return response
+
+
+@app.route("/joojeop/<coach_name>/generate", methods=["POST"])
+def generate_joojeop(coach_name):
+    user_id = decode_jwt_from_cookie()
+    content = gpt.get_gpt_response(coach_name + "에 대한 주접 하나 만들어줘")
+    sorting = request.view_args("sort_order")
+    return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sorting))
+
+
 def generate_jwt(user_id: str, secret_key: str, expiration_hours: int = 1) -> str:
     """
     주어진 user_id를 포함하는 JWT를 생성합니다.
@@ -245,6 +258,112 @@ def decode_jwt_from_cookie():
         print("유효하지 않은 JWT 토큰입니다.")
 
     return None
+
+
+def save_joojeop(author_id, author_name, coach_name, content):
+    """
+    주접을 저장하는 함수
+    """
+    joojeop = {
+        "id": len(joojeops) + 1,
+        "content": content,
+        "author_name": author_name,
+        "author_id": author_id,
+        "date": datetime.datetime.now().strftime("%Y-%m-%d"),
+        "like": 0,
+        "coach_name": coach_name
+    }
+    db.joojeops.insert_one(joojeop)
+
+
+def like_joojeop(joojeop_id):
+    """
+    주접에 좋아요를 누르는 함수
+    """
+    joojeop = db.joojeops.find_one({"id": joojeop_id})
+    if joojeop:
+        db.joojeops.update_one({"id": joojeop_id}, {"$inc": {"like": 1}})
+        return True
+    return False
+
+
+def get_joojeops_by_coach_name(order, coach_name, limit=None):
+    """
+    주어진 coach_name의 모든 주접을 가져와서 정렬하여 반환하는 함수
+    """
+    query = {}
+    if coach_name:
+        query["coach_name"] = coach_name
+
+    joojeops = list(db.joojeops.find(query))
+
+    if order == 'newest':
+        sorted_joojeops = sorted(
+            joojeops, key=lambda x: x['date'], reverse=True)
+    elif order == 'like':
+        sorted_joojeops = sorted(
+            joojeops, key=lambda x: x['like'], reverse=True)
+    elif order == 'oldest':
+        sorted_joojeops = sorted(
+            joojeops, key=lambda x: x['date'], reverse=False)
+    else:
+        sorted_joojeops = joojeops
+
+    if limit:
+        sorted_joojeops = sorted_joojeops[:limit]
+
+    return sorted_joojeops
+
+
+def get_joojeops_by_author_id(author_id, order='newest', limit=None):
+    """
+    주어진 author_id의 모든 주접을 가져와서 정렬하여 반환하는 함수
+    """
+    joojeops = list(db.joojeops.find({"author_id": author_id}))
+
+    if order == 'newest':
+        sorted_joojeops = sorted(
+            joojeops, key=lambda x: x['date'], reverse=True)
+    elif order == 'like':
+        sorted_joojeops = sorted(
+            joojeops, key=lambda x: x['like'], reverse=True)
+    elif order == 'oldest':
+        sorted_joojeops = sorted(
+            joojeops, key=lambda x: x['date'], reverse=False)
+    else:
+        sorted_joojeops = joojeops
+
+    if limit:
+        sorted_joojeops = sorted_joojeops[:limit]
+
+    return sorted_joojeops
+
+
+def get_joojeops(order='newest', limit=None):
+    """
+    모든 주접을 가져와서 정렬하여 반환하는 함수
+    :param order: 정렬 기준 ('newest', 'like' 또는 'oldest')
+    :param limit: 반환할 주접의 최대 개수 (None이면 제한 없음)
+    :return: 정렬된 주접 리스트
+    """
+    joojeops = list(db.joojeops.find())
+
+    if order == 'newest':
+        sorted_joojeops = sorted(
+            joojeops, key=lambda x: x['date'], reverse=True)
+    elif order == 'like':
+        sorted_joojeops = sorted(
+            joojeops, key=lambda x: x['like'], reverse=True)
+    elif order == 'oldest':
+        sorted_joojeops = sorted(
+            joojeops, key=lambda x: x['date'], reverse=False)
+    else:
+        sorted_joojeops = joojeops
+
+    if limit:
+        sorted_joojeops = sorted_joojeops[:limit]
+
+    return sorted_joojeops
 
 
 if __name__ == '__main__':
