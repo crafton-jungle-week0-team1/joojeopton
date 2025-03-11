@@ -3,7 +3,6 @@ import os
 from flask import Flask, redirect, request, jsonify, render_template, url_for
 from flask_dance.contrib.google import make_google_blueprint, google
 from flask_dance.contrib.github import make_github_blueprint, github
-from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user
 import jwt
 from pymongo import MongoClient
 
@@ -13,7 +12,7 @@ app = Flask(__name__)
 
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # HTTP에서도 사용 가능하도록 설정
-app.secret_key = os.getenv("APP_SECRET_KEY")
+app.secret_key = os.urandom(24)
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID")
@@ -38,14 +37,20 @@ app.register_blueprint(github_bp, url_prefix="/login")
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET")
 
 # demo db
-joojeops = [{"id": 1, "content": "김정민 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi", "author_id":'2344', "date": "2021-07-01", "like": 3, "coach_name": "김정민"},
-            {"id": 2, "content": "김현수 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi", "author_id":'2344', "date": "2021-07-01", "like": 3, "coach_name": "김현수"},
-            {"id": 3, "content": "방효식 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi", "author_id":'2344', "date": "2021-07-01", "like": 3, "coach_name": "방효식"},
-            {"id": 4, "content": "백승현 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi", "author_id":'2344', "date": "2021-07-01", "like": 3, "coach_name": "백승현"},
-            {"id": 5, "content": "안예인 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi", "author_id":'2344', "date": "2021-07-01", "like": 3, "coach_name": "안예인"},
-            {"id": 6, "content": "유윤선 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi", "author_id":'2344', "date": "2021-07-01", "like": 3, "coach_name": "유윤선"},
-            {"id": 7, "content": "이동석 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi", "author_id":'2344', "date": "2021-07-01", "like": 3, "coach_name": "이동석"},
-            {"id": 8, "content": "이승민 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi", "author_id":'2344', "date": "2021-07-01", "like": 3, "coach_name": "이승민"}]
+joojeops = [{"id": 1, "content": "김정민 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi", "author_id": '2344', "date": "2021-07-01", "like": 3, "coach_name": "김정민"},
+            {"id": 2, "content": "김현수 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi",
+                "author_id": '2344', "date": "2021-07-01", "like": 3, "coach_name": "김현수"},
+            {"id": 3, "content": "방효식 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi",
+                "author_id": '2344', "date": "2021-07-01", "like": 3, "coach_name": "방효식"},
+            {"id": 4, "content": "백승현 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi",
+                "author_id": '2344', "date": "2021-07-01", "like": 3, "coach_name": "백승현"},
+            {"id": 5, "content": "안예인 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi",
+                "author_id": '2344', "date": "2021-07-01", "like": 3, "coach_name": "안예인"},
+            {"id": 6, "content": "유윤선 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi",
+                "author_id": '2344', "date": "2021-07-01", "like": 3, "coach_name": "유윤선"},
+            {"id": 7, "content": "이동석 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi",
+                "author_id": '2344', "date": "2021-07-01", "like": 3, "coach_name": "이동석"},
+            {"id": 8, "content": "이승민 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi", "author_id": '2344', "date": "2021-07-01", "like": 3, "coach_name": "이승민"}]
 
 
 @app.context_processor
@@ -68,6 +73,8 @@ def utility_processor():
 
 # 맨 처음 접속하면 띄워지는 페이지. 모든 코치진의 사진과 이름을 보여준다.
 # 각 코치진을 클릭하면 그 코치의 주접을 볼 수 있는 페이지로 넘어간다.
+
+
 @app.route('/', methods=['GET'])
 def home():
     user_id = decode_jwt_from_cookie()
@@ -76,14 +83,14 @@ def home():
     user = db.users.find_one({"user_id": user_id})
     # 코치 DB, 픽스 값으로 유지
     coaches = [
-        {"name":"김정민", "path":"images/김정민.png"},
-        {"name":"김현수", "path":"images/김현수.png"},
-        {"name":"방효식", "path":"images/방효식.png"},
-        {"name":"백승현", "path":"images/백승현.png"},
-        {"name":"안예인", "path":"images/안예인.png"},
-        {"name":"유윤선", "path":"images/유윤선.png"},
-        {"name":"이동석", "path":"images/이동석.png"},
-        {"name":"이승민", "path":"images/이승민.png"},
+        {"name": "김정민", "path": "images/김정민.png"},
+        {"name": "김현수", "path": "images/김현수.png"},
+        {"name": "방효식", "path": "images/방효식.png"},
+        {"name": "백승현", "path": "images/백승현.png"},
+        {"name": "안예인", "path": "images/안예인.png"},
+        {"name": "유윤선", "path": "images/유윤선.png"},
+        {"name": "이동석", "path": "images/이동석.png"},
+        {"name": "이승민", "path": "images/이승민.png"},
     ]
     if user:
         order = request.args.get('order', 'newest')  # 기본값 newest
@@ -92,9 +99,11 @@ def home():
     else:
         return redirect(url_for("login"))
 
+
 @app.route("/login")
 def login():
     return render_template("login.html")
+
 
 @app.route('/joojeop/<coach_name>', methods=['GET'])
 def joojeop(coach_name):
@@ -105,12 +114,14 @@ def joojeop(coach_name):
     # 코치 딕셔너리 생성
     coach = {"name": coach_name, "path": f"images/{coach_name}.png"}
     # 해당 코치의 주접 리스트만 표현하도록 업데이트
-    filtered_joojeops = [joojeop for joojeop in joojeops if joojeop["coach_name"] == coach_name]
+    filtered_joojeops = [
+        joojeop for joojeop in joojeops if joojeop["coach_name"] == coach_name]
     # 해당 코치의 주접 리스트를 정렬
     order = request.args.get('order', 'newest')
     sorted_joojeops = sort_joojoeps(order=order, joojeops=filtered_joojeops)
     # 코치 데이터 템플릿에 넘겨주기
     return render_template("joojeop.html", coach=coach, joojeops=sorted_joojeops)
+
 
 def sort_joojoeps(order='newest', joojeops=joojeops):
     if order == 'newest':
@@ -119,6 +130,7 @@ def sort_joojoeps(order='newest', joojeops=joojeops):
         return sorted(joojeops, key=lambda x: x['like'], reverse=True)
     elif order == 'oldest':
         return sorted(joojeops, key=lambda x: x['date'], reverse=False)
+
 
 @app.route("/google")  # ✅ Google 로그인 처리
 def google_login():
@@ -254,7 +266,6 @@ def decode_jwt_from_cookie():
         print("유효하지 않은 JWT 토큰입니다.")
 
     return None
-
 
 
 if __name__ == '__main__':
