@@ -419,6 +419,8 @@ def get_today_joojeops_by_coach_name(coach_name):
 
     return top_10_joojeops
 
+# 코치님 이름으로 만들어진 주접 가져와서 메세지 만들기기
+
 
 def make_joojeop_message_for_coach(coach_name):
     list = get_today_joojeops_by_coach_name(coach_name, order='like', limit=10)
@@ -437,4 +439,4 @@ scheduler.add_job(id="scheduled_job", func=scheduled_job,
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port="127.0.0.1")
