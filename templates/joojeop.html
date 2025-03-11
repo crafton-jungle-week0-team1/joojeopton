@@ -15,7 +15,7 @@
             $('.keyword-btn').on('click', function () {
                 selectedKeyword = $(this).text().trim();
                 console.log("선택된 키워드:", selectedKeyword);
-
+                
                 // 버튼 시각 효과 (원하는 경우)
                 $('.keyword-btn').removeClass('bg-sky-200');
                 $(this).addClass('bg-sky-200');
@@ -30,7 +30,18 @@
                 }
                 this.action = `/joojeop/${coachName}/${sortOrder}/${encodeURIComponent(selectedKeyword)}/generate`;
             });
+
+            $('.save-btn').on('click', function () {
+                let content = $('.result').text();
+                $.post(`/joojeop/${encodeURIComponent(coachName)}/${sortOrder}/save`, {
+                    content: content
+                }, function (data) {
+                    alert("저장성공!");
+                    console.log(data);
+                });
+            });
         });
+
     </script>
 
 </head>
@@ -79,7 +90,8 @@
                 <div class="result border p-5">
                     {{ content }}
                 </div>
-                <button class="bg-white border border-blue-300 text-blue-400 hover:bg-blue-50 p-3 block mx-auto">주접
+
+                <button class="save-btn bg-white border border-blue-300 text-blue-400 hover:bg-blue-50 p-3 block mx-auto">주접
                     저장하기</button>
             </div>
 

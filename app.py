@@ -19,7 +19,6 @@ scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()
 
-
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # HTTP에서도 사용 가능하도록 설정
 app.secret_key = os.urandom(24)
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
@@ -103,7 +102,7 @@ def joojeop(coach_name, sort_order):
     coach = {"name": coach_name, "path": f"images/{coach_name}.png"}
     # 해당 코치의 주접 리스트만 표현하도록 업데이트
     joojeops = get_joojeops_by_coach_name(coach_name, sort_order)
-
+    print("주접 데이터베이스!!!\n", joojeops)
     # get content from query string if exists
     content = request.args.get('content', '')
 
@@ -236,8 +235,8 @@ def generate_joojeop(coach_name, sort_order, keyword):
     return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order, content=content))
 
 
-@app.route("/joojeop/<coach_name>/<sort_order>/<keyword>/save", methods=["POST"])
-def save_joojeop(coach_name, sort_order, keyword):
+@app.route("/joojeop/<coach_name>/<sort_order>/save", methods=["POST"])
+def save_joojeop(coach_name, sort_order):
     print("save_joojeop 함수 호출")
     user_id = decode_jwt_from_cookie()
     content = request.form.get("content")
@@ -449,4 +448,4 @@ scheduler.add_job(id="scheduled_job", func=scheduled_job,
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port="127.0.0.1")
+    app.run(debug=True)
