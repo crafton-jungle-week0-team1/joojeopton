@@ -86,7 +86,6 @@ def joojeop(coach_name, sort_order):
     coach = {"name": coach_name, "path": f"images/{coach_name}.png"}
     # 해당 코치의 주접 리스트만 표현하도록 업데이트
     joojeops = get_joojeops_by_coach_name(coach_name, sort_order)
-    print("주접 데이터베이스!!!\n", joojeops)
     # get content from query string if exists
     content = request.args.get('content', '')
 
@@ -214,7 +213,7 @@ def generate_joojeop(coach_name, sort_order, keyword):
 
 
 @app.route("/joojeop/<coach_name>/<sort_order>/save", methods=["POST"])
-def save_joojeop(coach_name, sort_order):
+def save_joojeop_route(coach_name, sort_order):
     print("save_joojeop 함수 호출")
     user_id = decode_jwt_from_cookie()
     content = request.form.get("content")
@@ -273,7 +272,6 @@ def save_joojeop(author_id, author_name, coach_name, content):
     주접을 저장하는 함수
     """
     joojeop = {
-        "id": len(joojeops) + 1,
         "content": content,
         "author_name": author_name,
         "author_id": author_id,
@@ -289,9 +287,9 @@ def like_joojeop(joojeop_id):
     주접에 좋아요를 누르는 함수
     """
     object_id = ObjectId(joojeop_id)
-    joojeop = db.joojeops.find_one({"id": object_id})
+    joojeop = db.joojeops.find_one({"_id": object_id})
     if joojeop:
-        db.joojeops.update_one({"id": joojeop_id}, {"$inc": {"like": 1}})
+        db.joojeops.update_one({"_id": object_id}, {"$inc": {"like": 1}})
         return True
 
 
@@ -323,9 +321,9 @@ def get_joojeops_by_coach_name(coach_name, order='newest', limit=None):
     if limit:
         sorted_joojeops = sorted_joojeops[:limit]
 
-    # id를 string으로 변환
+    # _id를 string으로 변환
     for joojeop in sorted_joojeops:
-        joojeop['id'] = str(joojeop['id'])
+        joojeop['_id'] = str(joojeop['_id'])
 
     return sorted_joojeops
 
@@ -353,7 +351,7 @@ def get_joojeops_by_author_id(author_id, order='newest', limit=None):
 
     # id를 string으로 변환
     for joojeop in sorted_joojeops:
-        joojeop['id'] = str(joojeop['id'])
+        joojeop['_id'] = str(joojeop['_id'])
 
     return sorted_joojeops
 
@@ -384,7 +382,7 @@ def get_joojeops(order='newest', limit=None):
 
     # id를 string으로 변환
     for joojeop in sorted_joojeops:
-        joojeop['id'] = str(joojeop['id'])
+        joojeop['_id'] = str(joojeop['_id'])
 
     return sorted_joojeops
 
@@ -402,7 +400,7 @@ def get_today_joojeops_by_coach_name(coach_name):
 
     # id를 string으로 변환
     for joojeop in top_10_joojeops:
-        joojeop['id'] = str(joojeop['id'])
+        joojeop['_id'] = str(joojeop['_id'])
 
     return top_10_joojeops
 
