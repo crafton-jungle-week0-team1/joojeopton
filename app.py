@@ -102,7 +102,7 @@ def joojeop(coach_name, sort_order):
     coach = {"name": coach_name, "path": f"images/{coach_name}.png"}
     # 해당 코치의 주접 리스트만 표현하도록 업데이트
     joojeops = get_joojeops_by_coach_name(coach_name, sort_order)
-
+    print("주접 데이터베이스!!!\n", joojeops)
     # get content from query string if exists
     content = request.args.get('content', '')
 
@@ -235,8 +235,8 @@ def generate_joojeop(coach_name, sort_order, keyword):
     return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order, content=content))
 
 
-@app.route("/joojeop/<coach_name>/<sort_order>/<keyword>/save", methods=["POST"])
-def save_joojeop(coach_name, sort_order, keyword):
+@app.route("/joojeop/<coach_name>/<sort_order>/save", methods=["POST"])
+def save_joojeop(coach_name, sort_order):
     print("save_joojeop 함수 호출")
     user_id = decode_jwt_from_cookie()
     content = request.form.get("content")
