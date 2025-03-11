@@ -8,6 +8,7 @@ import gpt
 from pymongo import MongoClient
 from flask_apscheduler import APScheduler
 import slack
+from bson.objectid import ObjectId
 
 client = MongoClient("mongodb://localhost:27017/")
 db = client.jujeopton
@@ -102,9 +103,8 @@ def joojeop(coach_name, sort_order):
     # 해당 코치의 주접 리스트만 표현하도록 업데이트
     joojeops = get_joojeops_by_coach_name(coach_name, sort_order)
 
-    #get content from query string if exists
+    # get content from query string if exists
     content = request.args.get('content', '')
-
 
     # 코치 데이터 템플릿에 넘겨주기
     return render_template("joojeop.html", coach=coach, joojeops=joojeops, sort_order=sort_order, content=content)
@@ -228,12 +228,20 @@ def logout():
 def generate_joojeop(coach_name, sort_order, keyword):
     print("generate_joojeop 함수 호출")
     user_id = decode_jwt_from_cookie()
-    content = gpt.get_gpt_response(f"{coach_name}에 대한 주접 하나 만들어줘. 아재개그 스타일 20글자 이내로. 키워드:{keyword}")
+    content = gpt.get_gpt_response(
+        f"{coach_name}에 대한 주접 하나 만들어줘. 아재개그 스타일 20글자 이내로. 키워드:{keyword}")
     print(content)
-    # Save the joojeop here if needed
-    # save_joojeop(user_id, user_name, coach_name, content)
 
     return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order, content=content))
+
+
+@app.route("/joojeop/<coach_name>/<sort_order>/<keyword>/save", methods=["POST"])
+def save_joojeop(coach_name, sort_order, keyword):
+    print("save_joojeop 함수 호출")
+    user_id = decode_jwt_from_cookie()
+    content = request.form.get("content")
+    save_joojeop(user_id, user_id, coach_name, content)
+    return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order))
 
 
 def generate_jwt(user_id: str, secret_key: str, expiration_hours: int = 1) -> str:
@@ -302,7 +310,8 @@ def like_joojeop(joojeop_id):
     """
     주접에 좋아요를 누르는 함수
     """
-    joojeop = db.joojeops.find_one({"id": joojeop_id})
+    object_id = ObjectId(joojeop_id)
+    joojeop = db.joojeops.find_one({"id": object_id})
     if joojeop:
         db.joojeops.update_one({"id": joojeop_id}, {"$inc": {"like": 1}})
         return True
