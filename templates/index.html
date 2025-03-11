@@ -25,41 +25,14 @@
     <div class="container grid grid-cols-2 divide-x-2">
         <div class="container profile p-10 grid grid-cols-4 gap-4">
             <!-- 프로필 예시 -->
-            <div class="profile">
-                <img src="{{ profile_url }}" alt="profile_img" class="mb-4">
+            {% for coach in coaches %}
+            <div class="profile flex flex-col items-center">
+                <img src="{{ url_for('static', filename=coach.path) }}" alt="image" class="mb-4" style="width: 100px; height: 125px; object-fit: cover;">
                 <button class="bg-white border border-blue-300 text-blue-400 hover:bg-blue-50 p-2 block mx-auto"
-                    id="myButton">주접떨기</button>
+                    id="btn-{{coach.name}}" onclick="location.href='joojeop?coach_name={{ coach.name }}'">주접떨기</button>
             </div>
-            <div class="profile">
-                <img src="{{ profile_url }}" alt="profile_img" class="mb-4">
-                <button
-                    class="bg-white border border-blue-300 text-blue-400 hover:bg-blue-50 p-2 block mx-auto">주접떨기</button>
-            </div>
-            <div class="profile">
-                <img src="{{ profile_url }}" alt="profile_img" class="mb-4">
-                <button
-                    class="bg-white border border-blue-300 text-blue-400 hover:bg-blue-50 p-2 block mx-auto">주접떨기</button>
-            </div>
-            <div class="profile">
-                <img src="{{ profile_url }}" alt="profile_img" class="mb-4">
-                <button
-                    class="bg-white border border-blue-300 text-blue-400 hover:bg-blue-50 p-2 block mx-auto">주접떨기</button>
-            </div>
-            <div class="profile">
-                <img src="{{ profile_url }}" alt="profile_img" class="mb-4">
-                <button
-                    class="bg-white border border-blue-300 text-blue-400 hover:bg-blue-50 p-2 block mx-auto">주접떨기</button>
-            </div>
-            <div class="profile">
-                <img src="{{ profile_url }}" alt="profile_img" class="mb-4">
-                <button
-                    class="bg-white border border-blue-300 text-blue-400 hover:bg-blue-50 p-2 block mx-auto">주접떨기</button>
-            </div>
-            <div class="profile">
-                <img src="{{ profile_url }}" alt="profile_img" class="mb-4">
-                <button
-                    class="bg-white border border-blue-300 text-blue-400 hover:bg-blue-50 p-2 block mx-auto">주접떨기</button>
-            </div>
+            {% endfor %}
+
 
         </div>
         <div class="container p-5">
