@@ -1,5 +1,5 @@
 .env 
-".venv"
-".DS_Store"
+.venv
+.DS_Store
 static/.DS_Store
 .gitignore
