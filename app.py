@@ -100,6 +100,7 @@ def login():
 def joojeop(coach_name):
     # 클라이언트에서 선택한 코치 이름 받아오기 -> path variable로 수정
     # coach_name = request.args.get('coach_name') 
+    print(coach_name)
 
     # 코치 딕셔너리 생성
     coach = {"name": coach_name, "path": f"images/{coach_name}.png"}
