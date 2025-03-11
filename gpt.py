@@ -2,7 +2,7 @@ import openai
 import os
 
 # 환경 변수에서 API 키를 불러옵니다.
-openai.api_key = ""
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
 def get_gpt_response(prompt):
