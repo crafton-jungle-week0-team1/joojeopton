@@ -77,7 +77,7 @@ def home():
     ]
     if user:
         order = request.args.get('order', 'newest')  # 기본값 newest
-        sorted_joojeops = sort_joojoeps(order=order)
+        sorted_joojeops = get_joojeops(order)
         return render_template("index.html", user=user, coaches=coaches, joojeops=sorted_joojeops)
     else:
         return redirect(url_for("login"))
@@ -95,13 +95,9 @@ def joojeop(coach_name, sort_order):
     # 코치 딕셔너리 생성
     coach = {"name": coach_name, "path": f"images/{coach_name}.png"}
     # 해당 코치의 주접 리스트만 표현하도록 업데이트
-    filtered_joojeops = [
-        joojeop for joojeop in joojeops if joojeop["coach_name"] == coach_name]
-
-    sorted_joojeops = sort_joojoeps(
-        order=sort_order, joojeops=filtered_joojeops)
+    joojeops = get_joojeops_by_coach_name(coach_name, sort_order)
     # 코치 데이터 템플릿에 넘겨주기
-    return render_template("joojeop.html", coach=coach, joojeops=sorted_joojeops)
+    return render_template("joojeop.html", coach=coach, joojeops=joojeops)
 
 
 def sort_joojoeps(order='newest', joojeops=joojeops):
@@ -214,6 +210,8 @@ def logout():
 def generate_joojeop(coach_name):
     user_id = decode_jwt_from_cookie()
     content = gpt.get_gpt_response(coach_name + "에 대한 주접 하나 만들어줘")
+    sorting = request.view_args("sort_order")
+    return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sorting))
 
 
 def generate_jwt(user_id: str, secret_key: str, expiration_hours: int = 1) -> str:
