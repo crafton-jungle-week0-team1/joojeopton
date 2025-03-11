@@ -56,9 +56,9 @@
                 <div id="dropdownMenu"
                     class="absolute mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg hidden">
                     <!-- 메뉴 항목들 -->
-                    <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">최신순</a>
-                    <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">좋아요순</a>
-                    <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">오래된순</a>
+                    <a href="?order=newest" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">최신순</a>
+                    <a href="?order=like" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">좋아요순</a>
+                    <a href="?order=oldest" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">오래된순</a>
                 </div>
             </div>
 
@@ -80,17 +80,6 @@
                 </div>
             </div>
             {% endfor %}
-
-            <!-- joojeops를 순회하며 각각의 데이터 표시
-            {% for joojeop in joojeops %}
-            <div style="border: 1px solid #ccc; margin: 8px; padding: 8px;">
-                <p><strong>ID:</strong> {{ joojeop.id }}</p>
-                <p><strong>Content:</strong> {{ joojeop.content }}</p>
-                <p><strong>Author:</strong> {{ joojeop.author }}</p>
-                <p><strong>Date:</strong> {{ joojeop.date }}</p>
-                <p><strong>Like:</strong> {{ joojeop.like }}</p>
-            </div>
-            {% endfor %} -->
         </div>
 </body>
 

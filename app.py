@@ -21,6 +21,7 @@ joojeops = [{"id": 1, "content": "김정민 좋아하지마\n그거 어떻게하
 # 각 코치진을 클릭하면 그 코치의 주접을 볼 수 있는 페이지로 넘어간다.
 @app.route('/', methods=['GET'])
 def home():
+    # 코치 DB, 픽스 값으로 유지
     coaches = [
         {"name":"김정민", "path":"images/김정민.png"},
         {"name":"김현수", "path":"images/김현수.png"},
@@ -31,22 +32,32 @@ def home():
         {"name":"이동석", "path":"images/이동석.png"},
         {"name":"이승민", "path":"images/이승민.png"},
     ]
-    return render_template("index.html", coaches=coaches, joojeops=joojeops)
+    order = request.args.get('order', 'newest')  # 기본값 newest
+    sorted_joojeops = sort_joojoeps(order=order)
+    return render_template("index.html", coaches=coaches, joojeops=sorted_joojeops)
 
 
 @app.route('/joojeop', methods=['GET'])
 def joojeop():
-    global joojeops
     # 클라이언트에서 선택한 코치 이름 받아오기
     coach_name = request.args.get('coach_name')
     # 코치 딕셔너리 생성
     coach = {"name": coach_name, "path": f"images/{coach_name}.png"}
     # 해당 코치의 주접 리스트만 표현하도록 업데이트
     filtered_joojeops = [joojeop for joojeop in joojeops if joojeop["coach_name"] == coach_name]
-    print('coach_name:', coach_name)
-    print('joojeops:', filtered_joojeops)
+    # 해당 코치의 주접 리스트를 정렬
+    order = request.args.get('order', 'newest')
+    sorted_joojeops = sort_joojoeps(order=order)
     # 코치 데이터 템플릿에 넘겨주기
-    return render_template("joojeop.html", coach=coach, joojeops=filtered_joojeops)
+    return render_template("joojeop.html", coach=coach, joojeops=sorted_joojeops)
+
+def sort_joojoeps(order='newest'):
+    if order == 'newest':
+        return sorted(joojeops, key=lambda x: x['date'], reverse=True)
+    elif order == 'like':
+        return sorted(joojeops, key=lambda x: x['like'], reverse=True)
+    elif order == 'oldest':
+        return sorted(joojeops, key=lambda x: x['date'], reverse=False)
 
 if __name__ == '__main__':
     app.run(debug=True)

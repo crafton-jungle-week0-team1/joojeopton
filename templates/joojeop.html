@@ -70,6 +70,14 @@
 
                 <!-- 드롭다운 컨테이너 -->
                 <div id="dropdownContainer" class="relative inline-block">
+                    <!-- 서버 사이드 쿼리 스트링 처리(조금 복잡함) -->
+                    {% set params_newest = request.args.to_dict() %}
+                    {% set params_like   = request.args.to_dict() %}
+                    {% set params_oldest = request.args.to_dict() %}
+                    
+                    {% set params_newest['order'] = 'newest' %}
+                    {% set params_like['order']   = 'like' %}
+                    {% set params_oldest['order'] = 'oldest' %}
                     <!-- 드롭다운 버튼 -->
                     <button id="dropdownButton"
                         class="px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 flex items-center">
@@ -85,9 +93,9 @@
                     <div id="dropdownMenu"
                         class="absolute mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg hidden">
                         <!-- 메뉴 항목들 -->
-                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">최신순</a>
-                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">좋아요순</a>
-                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">오래된순</a>
+                        <a href="?order=newest" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">최신순</a>
+                        <a href="?order=like" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">좋아요순</a>
+                        <a href="?order=oldest" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">오래된순</a>
                     </div>
                 </div>
             </div>
