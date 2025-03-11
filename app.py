@@ -91,13 +91,17 @@ def login():
 @app.route('/joojeop/<coach_name>/<sort_order>', methods=['GET'])
 def joojeop(coach_name, sort_order):
     # 클라이언트에서 선택한 코치 이름 path variable로 받아오기
-
     # 코치 딕셔너리 생성
     coach = {"name": coach_name, "path": f"images/{coach_name}.png"}
     # 해당 코치의 주접 리스트만 표현하도록 업데이트
     joojeops = get_joojeops_by_coach_name(coach_name, sort_order)
+
+    #get content from query string if exists
+    content = request.args.get('content', None)
+
+
     # 코치 데이터 템플릿에 넘겨주기
-    return render_template("joojeop.html", coach=coach, joojeops=joojeops)
+    return render_template("joojeop.html", coach=coach, joojeops=joojeops, sort_order=sort_order, content=content)
 
 
 def sort_joojoeps(order='newest', joojeops=joojeops):
@@ -206,13 +210,16 @@ def logout():
     return response
 
 
-@app.route("/joojeop/<coach_name>/generate", methods=["POST"])
-def generate_joojeop(coach_name):
+@app.route("/joojeop/<coach_name>/<sort_order>/generate", methods=["POST"])
+def generate_joojeop(coach_name, sort_order):
     print("generate_joojeop 함수 호출")
     user_id = decode_jwt_from_cookie()
-    content = gpt.get_gpt_response(coach_name + "에 대한 주접 하나 만들어줘")
-    sorting = request.view_args("sort_order")
-    return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sorting))
+    content = gpt.get_gpt_response(coach_name + "에 대한 주접 하나 만들어줘. 20글자 이내로")
+    print(content)
+    # Save the joojeop here if needed
+    # save_joojeop(user_id, user_name, coach_name, content)
+    
+    return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order, content=content))
 
 
 def generate_jwt(user_id: str, secret_key: str, expiration_hours: int = 1) -> str:
@@ -285,13 +292,13 @@ def like_joojeop(joojeop_id):
     if joojeop:
         db.joojeops.update_one({"id": joojeop_id}, {"$inc": {"like": 1}})
         return True
-    return False
-
-
-def get_joojeops_by_coach_name(order, coach_name, limit=None):
+def get_joojeops_by_coach_name(coach_name, order='newest', limit=None):
     """
     주어진 coach_name의 모든 주접을 가져와서 정렬하여 반환하는 함수
     """
+    query = {}
+    if coach_name:
+        query["coach_name"] = coach_name
     query = {}
     if coach_name:
         query["coach_name"] = coach_name
