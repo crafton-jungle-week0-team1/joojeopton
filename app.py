@@ -44,23 +44,6 @@ github_bp = make_github_blueprint(
 app.register_blueprint(github_bp, url_prefix="/login")
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET")
 
-# demo db
-joojeops = [{"id": 1, "content": "김정민 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi", "author_id": '2344', "date": "2021-07-01", "like": 3, "coach_name": "김정민"},
-            {"id": 2, "content": "김현수 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi",
-                "author_id": '2344', "date": "2021-07-01", "like": 3, "coach_name": "김현수"},
-            {"id": 9, "content": "김현수 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi",
-                "author_id": '2344', "date": "2021-04-01", "like": 10, "coach_name": "김현수"},
-            {"id": 3, "content": "방효식 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi",
-                "author_id": '2344', "date": "2021-07-01", "like": 3, "coach_name": "방효식"},
-            {"id": 4, "content": "백승현 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi",
-                "author_id": '2344', "date": "2021-07-01", "like": 3, "coach_name": "백승현"},
-            {"id": 5, "content": "안예인 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi",
-                "author_id": '2344', "date": "2021-07-01", "like": 3, "coach_name": "안예인"},
-            {"id": 6, "content": "유윤선 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi",
-                "author_id": '2344', "date": "2021-07-01", "like": 3, "coach_name": "유윤선"},
-            {"id": 7, "content": "이동석 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi",
-                "author_id": '2344', "date": "2021-07-01", "like": 3, "coach_name": "이동석"},
-            {"id": 8, "content": "이승민 좋아하지마\n그거 어떻게하는데...\n", "author_name": "choi", "author_id": '2344', "date": "2021-07-01", "like": 3, "coach_name": "이승민"}]
 
 
 # 맨 처음 접속하면 띄워지는 페이지. 모든 코치진의 사진과 이름을 보여준다.
@@ -97,6 +80,7 @@ def login():
 
 @app.route('/joojeop/<coach_name>/<sort_order>', methods=['GET'])
 def joojeop(coach_name, sort_order):
+    print("joojeop 함수 호출")
     # 클라이언트에서 선택한 코치 이름 path variable로 받아오기
     # 코치 딕셔너리 생성
     coach = {"name": coach_name, "path": f"images/{coach_name}.png"}
@@ -118,13 +102,7 @@ def like(joojeop_id):
     return redirect(url_for("home"))
 
 
-def sort_joojoeps(order='newest', joojeops=joojeops):
-    if order == 'newest':
-        return sorted(joojeops, key=lambda x: x['date'], reverse=True)
-    elif order == 'like':
-        return sorted(joojeops, key=lambda x: x['like'], reverse=True)
-    elif order == 'oldest':
-        return sorted(joojeops, key=lambda x: x['date'], reverse=False)
+
 
 
 @app.route("/google")  # ✅ Google 로그인 처리
