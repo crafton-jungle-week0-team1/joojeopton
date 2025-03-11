@@ -9,6 +9,30 @@
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 
+    <script>
+        $(document).ready(function () {
+            let selectedKeyword = '';
+            $('.keyword-btn').on('click', function () {
+                selectedKeyword = $(this).text().trim();
+                console.log("선택된 키워드:", selectedKeyword);
+
+                // 버튼 시각 효과 (원하는 경우)
+                $('.keyword-btn').removeClass('bg-sky-200');
+                $(this).addClass('bg-sky-200');
+            });
+            let coachName = "{{ coach.name }}";
+            let sortOrder = "{{ sort_order }}";
+            $('form').on('submit', function () {
+                if (!selectedKeyword) {
+                    alert("키워드를 하나 이상 선택해주세요!");
+                    e.preventDefault(); // 폼 전송 중단
+                    return false;
+                }
+                this.action = `/joojeop/${coachName}/${sortOrder}/${encodeURIComponent(selectedKeyword)}/generate`;
+            });
+        });
+    </script>
+
 </head>
 
 <body>
@@ -33,26 +57,27 @@
             <div class="container">
                 <div class="container">
                     <button
-                        class="m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#뭔들</button>
+                        class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#뭔들</button>
                     <button
-                        class="m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#잘생김</button>
+                        class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#잘생김</button>
                     <button
-                        class="m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#친절함</button>
+                        class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#친절함</button>
                     <button
-                        class="m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#다정함</button>
+                        class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#다정함</button>
                     <button
-                        class="m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#멋짐</button>
+                        class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#멋짐</button>
                     <button
-                        class="m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#사랑스러움</button>
+                        class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#사랑스러움</button>
                 </div>
-                <form action="/joojeop/{{ coach.name }}/{{ sort_order }}/{{ keyword }}/generate" method="post" style="margin: 0; padding: 0;">
-                    <button type="submit" class="bg-white border border-blue-300 text-blue-400 hover:bg-blue-50 p-3 block mx-auto">주접떨기</button>
+                <form action="" method="post" style="margin: 0; padding: 0;">
+                    <button type="submit"
+                        class="bg-white border border-blue-300 text-blue-400 hover:bg-blue-50 p-3 block mx-auto">주접떨기</button>
                 </form>
             </div>
 
             <div class="col-span-2 mt-4 space-y-4">
                 <div class="result border p-5">
-                    {{ content }} {{ coach.name }}
+                    {{ content }}
                 </div>
                 <button class="bg-white border border-blue-300 text-blue-400 hover:bg-blue-50 p-3 block mx-auto">주접
                     저장하기</button>
@@ -86,9 +111,12 @@
                     <!-- 드롭다운 메뉴 (초기에는 hidden 클래스 적용) -->
                     <div id="dropdownMenu"
                         class="absolute mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg hidden">
-                        <a href="/joojeop/{{coach.name}}/newest" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">최신순</a>
-                        <a href="/joojeop/{{coach.name}}/like" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">좋아요순</a>
-                        <a href="/joojeop/{{coach.name}}/oldest" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">오래된순</a>
+                        <a href="/joojeop/{{coach.name}}/newest"
+                            class="block px-4 py-2 text-gray-700 hover:bg-gray-100">최신순</a>
+                        <a href="/joojeop/{{coach.name}}/like"
+                            class="block px-4 py-2 text-gray-700 hover:bg-gray-100">좋아요순</a>
+                        <a href="/joojeop/{{coach.name}}/oldest"
+                            class="block px-4 py-2 text-gray-700 hover:bg-gray-100">오래된순</a>
                     </div>
                 </div>
             </div>
