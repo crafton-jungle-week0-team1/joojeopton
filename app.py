@@ -18,7 +18,6 @@ scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()
 
-
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # HTTP에서도 사용 가능하도록 설정
 app.secret_key = os.urandom(24)
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
@@ -440,4 +439,4 @@ scheduler.add_job(id="scheduled_job", func=scheduled_job,
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port="127.0.0.1")
+    app.run(debug=True)
