@@ -8,6 +8,7 @@ import gpt
 from pymongo import MongoClient
 from flask_apscheduler import APScheduler
 import slack
+from bson.objectid import ObjectId
 
 client = MongoClient("mongodb://localhost:27017/")
 db = client.jujeopton
@@ -302,7 +303,8 @@ def like_joojeop(joojeop_id):
     """
     주접에 좋아요를 누르는 함수
     """
-    joojeop = db.joojeops.find_one({"id": joojeop_id})
+    object_id = ObjectId(joojeop_id)
+    joojeop = db.joojeops.find_one({"id": object_id})
     if joojeop:
         db.joojeops.update_one({"id": joojeop_id}, {"$inc": {"like": 1}})
         return True
