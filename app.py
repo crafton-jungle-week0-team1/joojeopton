@@ -208,6 +208,7 @@ def logout():
 
 @app.route("/joojeop/<coach_name>/generate", methods=["POST"])
 def generate_joojeop(coach_name):
+    print("generate_joojeop 함수 호출")
     user_id = decode_jwt_from_cookie()
     content = gpt.get_gpt_response(coach_name + "에 대한 주접 하나 만들어줘")
     sorting = request.view_args("sort_order")
