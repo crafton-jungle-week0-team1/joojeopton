@@ -81,9 +81,8 @@ def home():
     return render_template("index.html", user=user, coaches=coaches, joojeops=sorted_joojeops)
 
 
-# 주접 생성/작성 페이지
-@app.route('/joojeop/<coach_name>/<sort_order>', methods=['GET'])
-def joojeop(coach_name, sort_order):
+@app.route('/joojeop/<coach_name>', methods=['GET'])
+def joojeop(coach_name):
     user_id = decode_jwt_from_cookie()
     if user_id is None:
         return redirect(url_for("login"))
@@ -93,6 +92,8 @@ def joojeop(coach_name, sort_order):
     coach = {"name": coach_name, "path": f"images/{coach_name}.png"}
     # 해당 코치의 주접 리스트만 표현하도록 업데이트
     filter_option = request.args.get('filter', 'all')  # 기본값 all
+    # 아래 코드로 인해서 경로 변수는 사용 안 함. (추후 삭제)
+    sort_order = request.args.get('sort_order', 'newest')  # 기본값 newest
     joojeops = get_joojeops_by_coach_name(
         coach_name, sort_order, filter_option=filter_option)
 
@@ -248,28 +249,30 @@ def logout():
     return response
 
 
-# Gemini 기반 주접 생성
-@app.route("/joojeop/<coach_name>/<sort_order>/<keyword>/generate/gemini", methods=["POST"])
-def generate_joojeop_gemini(coach_name, sort_order, keyword):
+@app.route("/joojeop/<coach_name>/<keyword>/generate/gemini", methods=["POST"])
+def generate_joojeop_gemini(coach_name, keyword):
     print("generate_joojeop 함수 호출")
     user_id = decode_jwt_from_cookie()
     content = gemini.get_gemini_response(
         f"{coach_name}에 대한 주접 하나 만들어줘. 트위터 말투. 키워드:{keyword}")
     print(content)
+    sort_order = request.args.get('sort_order', 'newest')
+    filter = request.args.get('filter', 'all')
 
-    return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order, content=content))
+    return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order, content=content, filter=filter))
 
 
-# GPT 기반 주접 생성
-@app.route("/joojeop/<coach_name>/<sort_order>/<keyword>/generate/gpt", methods=["POST"])
-def generate_joojeop_gpt(coach_name, sort_order, keyword):
+@app.route("/joojeop/<coach_name>/<keyword>/generate/gpt", methods=["POST"])
+def generate_joojeop_gpt(coach_name, keyword):
     print("generate_joojeop 함수 호출")
     user_id = decode_jwt_from_cookie()
+    sort_order = request.args.get('sort_order', 'newest')
+    filter = request.args.get('filter', 'all')
     content = gpt.get_gpt_response(
         f"{coach_name}에 대한 주접 하나 만들어줘. 아재개그 스타일 20글자 이내로. 키워드:{keyword}")
     print(content)
 
-    return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order, content=content))
+    return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order, content=content, filter=filter))
 
 
 # 주접 저장
@@ -445,7 +448,7 @@ def dislike_joojeop(joojeop_id, user_id):
     return True
 
 
-def get_joojeops_by_coach_name(coach_name, order='newest', limit=5, filter_option='all'):
+def get_joojeops_by_coach_name(coach_name, order='newest', limit=None, filter_option='all'):
     """
     주어진 coach_name의 모든 주접을 가져와서 정렬하여 반환하는 함수
     """
@@ -464,6 +467,9 @@ def get_joojeops_by_coach_name(coach_name, order='newest', limit=5, filter_optio
     elif order == 'like':
         sorted_joojeops = sorted(
             joojeops, key=lambda x: x['like'], reverse=True)
+    elif order == 'dislike':
+        sorted_joojeops = sorted(
+            joojeops, key=lambda x: x['dislike'], reverse=True)
     elif order == 'oldest':
         sorted_joojeops = sorted(
             joojeops, key=lambda x: x['date'], reverse=False)
@@ -493,7 +499,7 @@ def get_joojeops_by_coach_name(coach_name, order='newest', limit=5, filter_optio
     return sorted_joojeops
 
 
-def get_joojeops_by_author_id(author_id, order='newest', limit=5):
+def get_joojeops_by_author_id(author_id, order='newest', limit=None):
     """
     주어진 author_id의 모든 주접을 가져와서 정렬하여 반환하는 함수
     """
@@ -505,6 +511,9 @@ def get_joojeops_by_author_id(author_id, order='newest', limit=5):
     elif order == 'like':
         sorted_joojeops = sorted(
             joojeops, key=lambda x: x['like'], reverse=True)
+    elif order == 'dislike':
+        sorted_joojeops = sorted(
+            joojeops, key=lambda x: x['dislike'], reverse=True)
     elif order == 'oldest':
         sorted_joojeops = sorted(
             joojeops, key=lambda x: x['date'], reverse=False)
@@ -521,7 +530,7 @@ def get_joojeops_by_author_id(author_id, order='newest', limit=5):
     return sorted_joojeops
 
 
-def get_joojeops(order='newest', limit=5, filter_option='all'):
+def get_joojeops(order='newest', limit=None, filter_option='all'):
     """
     모든 주접을 가져와서 정렬하여 반환하는 함수
     :param order: 정렬 기준 ('newest', 'like' 또는 'oldest')
@@ -536,6 +545,9 @@ def get_joojeops(order='newest', limit=5, filter_option='all'):
     elif order == 'like':
         sorted_joojeops = sorted(
             joojeops, key=lambda x: x['like'], reverse=True)
+    elif order == 'dislike':
+        sorted_joojeops = sorted(
+            joojeops, key=lambda x: x['dislike'], reverse=True)
     elif order == 'oldest':
         sorted_joojeops = sorted(
             joojeops, key=lambda x: x['date'], reverse=False)
