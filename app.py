@@ -53,17 +53,17 @@ github_bp = make_github_blueprint(
 app.register_blueprint(github_bp, url_prefix="/login")
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET")
 
-# 코치 DB, 픽스 값으로 유지
-coaches = [
-    {"name": "김정민", "path": "images/1.png", "id": "1"},
-    {"name": "김현수", "path": "images/2.png", "id": "2"},
-    {"name": "방효식", "path": "images/3.png", "id": "3"},
-    {"name": "백승현", "path": "images/4.png", "id": "4"},
-    {"name": "안예인", "path": "images/5.png", "id": "5"},
-    {"name": "유윤선", "path": "images/6.png", "id": "6"},
-    {"name": "이동석", "path": "images/7.png", "id": "7"},
-    {"name": "이승민", "path": "images/8.png", "id": "8"},
-]
+# # 코치 DB, 픽스 값으로 유지
+# coaches = [
+#     {"name": "김정민", "path": "images/1.png", "id": "1"},
+#     {"name": "김현수", "path": "images/2.png", "id": "2"},
+#     {"name": "방효식", "path": "images/3.png", "id": "3"},
+#     {"name": "백승현", "path": "images/4.png", "id": "4"},
+#     {"name": "안예인", "path": "images/5.png", "id": "5"},
+#     {"name": "유윤선", "path": "images/6.png", "id": "6"},
+#     {"name": "이동석", "path": "images/7.png", "id": "7"},
+#     {"name": "이승민", "path": "images/8.png", "id": "8"},
+# ]
 
 def save_coach(coach):
     db.coaches.insert_one(coach)
@@ -78,7 +78,6 @@ def save_coach_route():
         return redirect(url_for("home"))
 
     coach = {
-        "id": str(ObjectId()),
         "name": request.form.get("name"),
         "path": "",
     }
@@ -106,12 +105,15 @@ def home():
     if user_id is not None:
         user = get_user_by_user_id(user_id)
 
-    if user_id in ADMIN_LIST:
-        user["is_admin"] = True
+    if user_id in ADMIN_LIST and user is not None:
+        user["is_admin"] = True 
 
     order = request.args.get('order', 'newest')  # 기본값 newest
     filter_option = request.args.get('filter', 'all')  # 기본값 all
     sorted_joojeops = get_joojeops(order, filter_option=filter_option)
+    coaches = list(db.coaches.find())
+    for coach in coaches:
+        coach["id"] = str(coach["_id"])
     return render_template("index.html", user=user, coaches=coaches, joojeops=sorted_joojeops)
 
 
@@ -124,8 +126,12 @@ def joojeop(coach_id):
     if user_id in ADMIN_LIST:
         user["is_admin"] = True
     # 클라이언트에서 선택한 코치 이름 path variable로 받아오기
-    # 코치 딕셔너리 생성
-    coach = {"id": coach_id, "path": f"images/{coach_id}.png"}
+    # 코치 데이터 가져오기
+    coach = db.coaches.find_one({"_id": ObjectId(coach_id)})
+    coach["id"] = str(coach["_id"])
+    print("주접코치", coach)
+    if not coach:
+        return "해당 코치가 존재하지 않습니다.", 404
     # 해당 코치의 주접 리스트만 표현하도록 업데이트
     filter_option = request.args.get('filter', 'all')  # 기본값 all
     # 아래 코드로 인해서 경로 변수는 사용 안 함. (추후 삭제)
@@ -290,11 +296,8 @@ def generate_joojeop_gemini(coach_id, keyword):
     print("generate_joojeop 함수 호출")
     user_id = decode_jwt_from_cookie()
     # Get coach name from coach_id
-    coach_name = None
-    for coach in coaches:
-        if coach["id"] == coach_id:
-            coach_name = coach["name"]
-            break
+    coach = db.coaches.find_one({"_id": ObjectId(coach_id)})
+    coach_name = coach["name"]
     content = gemini.get_gemini_response(
         f"{coach_name}에 대한 주접 하나 만들어줘. 트위터 말투. 키워드:{keyword}")
     print(content)
@@ -310,11 +313,9 @@ def generate_joojeop_gpt(coach_id, keyword):
     user_id = decode_jwt_from_cookie()
     sort_order = request.args.get('sort_order', 'newest')
     filter = request.args.get('filter', 'all')
-    coach_name = None
-    for coach in coaches:
-        if coach["id"] == coach_id:
-            coach_name = coach["name"]
-            break
+    # Get coach name from coach_id
+    coach = db.coaches.find_one({"_id": ObjectId(coach_id)})
+    coach_name = coach["name"]
     content = gpt.get_gpt_response(
         f"{coach_name}에 대한 주접 하나 만들어줘. 아재개그 스타일 20글자 이내로. 키워드:{keyword}")
     print(content)
