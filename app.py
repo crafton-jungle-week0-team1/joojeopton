@@ -331,6 +331,7 @@ def slack_limit():
     global BEST_LIMIT, WORST_LIMIT
     BEST_LIMIT = int(request.form.get("best_limit"))
     WORST_LIMIT = int(request.form.get("worst_limit"))
+    print(BEST_LIMIT, WORST_LIMIT)
     return jsonify({"success": True, "message": "Updated limit"}), 200
 
 
@@ -587,6 +588,9 @@ def get_today_best_joojeops_by_coach_name(coach_name, limit=5):
     """
     오늘 작성된 주접들을 코치 이름을 입력받아 좋아요 순으로 반환하고, 10개까지만 반환하는 함수
     """
+    if BEST_LIMIT == 0:
+        return []
+
     today_str = datetime.datetime.now().date()  # 현재 날짜 (시간 제외)
 
     query = {
@@ -607,6 +611,9 @@ def get_today_worst_joojeops_by_coach_name(coach_name, limit=5):
     """
     오늘 작성된 주접들을 코치 이름을 입력받아 좋아요 순으로 반환하고, 10개까지만 반환하는 함수
     """
+    if WORST_LIMIT == 0:
+        return []
+
     today_str = datetime.datetime.now().date()  # 현재 날짜 (시간 제외)
 
     query = {
@@ -643,13 +650,13 @@ def make_joojeop_message_for_coach(coach_name, best_limit, worst_limit):
     else:
         message = f"[ 오늘 {coach_name} 코치님의 Best 주접과 worst 주접입니다!! ]\n-----------------------------------------\n"
     count = 0
-    message += "< Best 주접 >\n"
+    message += "< Best 주접 >\n" if len(best_list) != 0 else ""
     for joojeop in best_list:
         count += 1
         message += f"{count}. {joojeop['content']} \n| <작성자> : {joojeop['author_name']} | 좋아요 {joojeop['like']}개 |\n"
     message += "\n=============================================================\n\n"
     count = 0
-    message += "< Worst 주접 >\n"
+    message += "< Worst 주접 >\n" if len(worst_list) != 0 else ""
     for joojeop in worst_list:
         count += 1
         message += f"{count}. {joojeop['content']} | 작성자 : {joojeop['author_name']} | 싫어요 {joojeop['dislike']}개 |\n"
