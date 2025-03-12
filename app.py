@@ -77,6 +77,7 @@ def joojeop(coach_name, sort_order):
     user_id = decode_jwt_from_cookie()
     if user_id is None:
         return redirect(url_for("login"))
+    user = get_user_by_user_id(user_id)
     # 클라이언트에서 선택한 코치 이름 path variable로 받아오기
     # 코치 딕셔너리 생성
     coach = {"name": coach_name, "path": f"images/{coach_name}.png"}
@@ -267,7 +268,8 @@ def save_joojeop_route(coach_name, sort_order):
 
 @app.route("/slack/time", methods=["POST"])
 def slack_time():
-    hour = int(request.form.get("time"))
+    print("slack_time 함수 호출")
+    hour = int(request.form.get("hour"))
     minute = int(request.form.get("minute"))
 
     try:
