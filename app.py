@@ -300,19 +300,21 @@ def slack_time():
     minute = int(request.form.get("minute"))
 
     try:
-        scheduler.modify_job("scheduled_job", trigger="cron",
-                             hour=hour, minute=minute)
-        response = {"success": True,
-                    "message": f"Updated schedule to {hour}:{minute}"}
-        status_code = 200
+        scheduler.remove_job("scheduled_job")
+        scheduler.add_job(
+            id="scheduled_job",
+            func=scheduled_job,
+            trigger="cron",
+            hour=hour,
+            minute=minute
+        )
+        return jsonify({"success": True, "message": f"전송 시간이 {hour}시 {minute}분으로 설정되었습니다."}), 200
     except Exception as e:
-        response = {"success": False, "error": str(e)}
-        status_code = 400
+        return jsonify({"success": False, "error": str(e)}), 400
+    
 
-    return jsonify(response), status_code
-
-
-@app.route("/slack/limit", methods=["POST"])  # 슬랙 메세지 리미트 설정
+# 슬랙 메세지 리미트 설정
+@app.route("/slack/limit", methods=["POST"])  
 def slack_limit():
     user_id = decode_jwt_from_cookie()
     if user_id not in ADMIN_LIST:
@@ -323,7 +325,8 @@ def slack_limit():
     return jsonify({"success": True, "message": "Updated limit"}), 200
 
 
-@app.route("/slack/send", methods=["POST"])  # 슬랙 메세지 수동 전송
+# 슬랙 메세지 즉시 전송
+@app.route("/slack/send", methods=["POST"])  
 def slack_send():
     user_id = decode_jwt_from_cookie()
     if user_id not in ADMIN_LIST:
