@@ -401,7 +401,7 @@ def dislike_joojeop(joojeop_id, user_id):
     return True
 
 
-def get_joojeops_by_coach_name(coach_name, order='newest', limit=5, filter_option='all'):
+def get_joojeops_by_coach_name(coach_name, order='newest', limit=None, filter_option='all'):
     """
     주어진 coach_name의 모든 주접을 가져와서 정렬하여 반환하는 함수
     """
@@ -452,7 +452,7 @@ def get_joojeops_by_coach_name(coach_name, order='newest', limit=5, filter_optio
     return sorted_joojeops
 
 
-def get_joojeops_by_author_id(author_id, order='newest', limit=5):
+def get_joojeops_by_author_id(author_id, order='newest', limit=None):
     """
     주어진 author_id의 모든 주접을 가져와서 정렬하여 반환하는 함수
     """
@@ -483,7 +483,7 @@ def get_joojeops_by_author_id(author_id, order='newest', limit=5):
     return sorted_joojeops
 
 
-def get_joojeops(order='newest', limit=5, filter_option='all'):
+def get_joojeops(order='newest', limit=None, filter_option='all'):
     """
     모든 주접을 가져와서 정렬하여 반환하는 함수
     :param order: 정렬 기준 ('newest', 'like' 또는 'oldest')
