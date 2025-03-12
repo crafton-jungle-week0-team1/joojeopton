@@ -670,13 +670,16 @@ def get_today_worst_joojeops_by_coach_id(coach_id, limit=5):
         return []
 
     today_str = datetime.datetime.now().date()  # 현재 날짜 (시간 제외)
-
+    print(coach_id)
     query = {
         "coach_id": coach_id,
         "date": {"$regex": f"^{today_str}"}
     }
     top_10_joojeops = list(db.joojeops.find(
         query).sort("dislike", -1).limit(limit))
+
+    for joojeop in top_10_joojeops:
+        print(joojeop)
 
     # id를 string으로 변환
     for joojeop in top_10_joojeops:
@@ -687,13 +690,13 @@ def get_today_worst_joojeops_by_coach_id(coach_id, limit=5):
 # 코치님 이름으로 만들어진 주접 가져와서 메세지 만들기기
 
 
-def make_joojeop_message_for_coach(coach_name, best_limit, worst_limit):
-    best_list = get_today_best_joojeops_by_coach_id(coach_name, best_limit)
+def make_joojeop_message_for_coach(coach_id, best_limit, worst_limit):
+    best_list = get_today_best_joojeops_by_coach_id(coach_id, best_limit)
     worst_list = get_today_worst_joojeops_by_coach_id(
-        coach_name, worst_limit)
+        coach_id, worst_limit)
     best_ids = {item['_id'] for item in best_list}
     worst_list = [item for item in worst_list if item['_id'] not in best_ids]
-
+    coach_name = db.coaches.find_one({"_id": ObjectId(coach_id)})["name"]
     if len(best_list) == 0 and len(worst_list) == 0:
         return f"[ 오늘 _{coach_name} 코치_ 님의 주접이 없습니다😢 ]"
 
@@ -723,8 +726,9 @@ def make_joojeop_message_for_coach(coach_name, best_limit, worst_limit):
 def scheduled_job():
     coaches = list(db.coaches.find())
     for coach in coaches:
+        coach['id'] = str(coach['_id'])   
         slack.send_slack_message(make_joojeop_message_for_coach(
-            coach["name"], BEST_LIMIT, WORST_LIMIT))
+            coach["id"], BEST_LIMIT, WORST_LIMIT))
 
 
 scheduler.add_job(id="scheduled_job", func=scheduled_job,
