@@ -121,6 +121,19 @@
                 );
                 window.location.href = newUrl;
             });
+            //정렬 할당 함수들
+            $('.sort-btn.newest').on('click', function () {
+                var newUrl = updateQueryStringParameter(window.location.href, 'sort_order', 'newest');
+                window.location.href = newUrl;
+            });
+            $('.sort-btn.like').on('click', function () {
+                var newUrl = updateQueryStringParameter(window.location.href, 'sort_order', 'like');
+                window.location.href = newUrl;
+            });
+            $('.sort-btn.oldest').on('click', function () {
+                var newUrl = updateQueryStringParameter(window.location.href, 'sort_order', 'oldest');
+                window.location.href = newUrl;
+            });
         });
     </script>
 </head>
@@ -218,12 +231,9 @@
                     <!-- 드롭다운 메뉴 (초기에는 hidden 클래스 적용) -->
                     <div id="dropdownMenu"
                         class="absolute mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg hidden">
-                        <a href="/joojeop/{{coach.name}}/newest"
-                            class="block px-4 py-2 text-gray-700 hover:bg-gray-100">최신순</a>
-                        <a href="/joojeop/{{coach.name}}/like"
-                            class="block px-4 py-2 text-gray-700 hover:bg-gray-100">좋아요순</a>
-                        <a href="/joojeop/{{coach.name}}/oldest"
-                            class="block px-4 py-2 text-gray-700 hover:bg-gray-100">오래된순</a>
+                        <a class="sort-btn newest block px-4 py-2 text-gray-700 hover:bg-gray-100">최신순</a>
+                        <a class="sort-btn like block px-4 py-2 text-gray-700 hover:bg-gray-100">좋아요순</a>
+                        <a class="sort-btn oldest block px-4 py-2 text-gray-700 hover:bg-gray-100">오래된순</a>
                     </div>
                 </div>
             </div>

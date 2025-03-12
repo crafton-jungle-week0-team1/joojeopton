@@ -52,7 +52,6 @@
                 e.preventDefault();
                 let joojeop_id = $(this).find('input[name="joojeop_id"]').val();
                 $.post(`/joojeop/${joojeop_id}/delete`, {
-
                 }, function (data) {
                     location.reload();
                 });
@@ -66,6 +65,20 @@
             // "내주접" 버튼 클릭 시: 쿼리 파라미터 filter=mine 추가
             $('.my-joojeop-btn').on('click', function () {
                 var newUrl = updateQueryStringParameter(window.location.href, 'filter', 'mine');
+                window.location.href = newUrl;
+            });
+            
+            //정렬 할당 함수들
+            $('.sort-btn.newest').on('click', function () {
+                var newUrl = updateQueryStringParameter(window.location.href, 'sort_order', 'newest');
+                window.location.href = newUrl;
+            });
+            $('.sort-btn.like').on('click', function () {
+                var newUrl = updateQueryStringParameter(window.location.href, 'sort_order', 'like');
+                window.location.href = newUrl;
+            });
+            $('.sort-btn.oldest').on('click', function () {
+                var newUrl = updateQueryStringParameter(window.location.href, 'sort_order', 'oldest');
                 window.location.href = newUrl;
             });
 
@@ -126,9 +139,9 @@
                <!-- 드롭다운 메뉴 (초기에는 hidden 클래스 적용) -->
                     <div id="dropdownMenu"
                         class="absolute mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg hidden">
-                        <span class="sort-btn newest block px-4 py-2 text-gray-700 hover:bg-gray-100">최신순</span>
-                        <span class="sort-btn newest block px-4 py-2 text-gray-700 hover:bg-gray-100">오래된순</span>
-                        <span class="sort-btn newest block px-4 py-2 text-gray-700 hover:bg-gray-100">좋아요순</span>
+                        <a class="sort-btn newest block px-4 py-2 text-gray-700 hover:bg-gray-100">최신순</a>
+                        <a class="sort-btn oldest block px-4 py-2 text-gray-700 hover:bg-gray-100">오래된순</a>
+                        <a class="sort-btn like block px-4 py-2 text-gray-700 hover:bg-gray-100">좋아요순</a>
                     </div>
             </div>
 

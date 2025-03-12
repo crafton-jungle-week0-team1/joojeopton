@@ -69,6 +69,7 @@ def home():
         order = request.args.get('order', 'newest')  # 기본값 newest
         print
         filter_option = request.args.get('filter', 'all')  # 기본값 all
+        order = request.args.get('sort_order', 'newest')  # 기본값 newest
         sorted_joojeops = get_joojeops(order, filter_option=filter_option)
         for joojeop in sorted_joojeops:
             print(
@@ -89,6 +90,8 @@ def joojeop(coach_name, sort_order):
     coach = {"name": coach_name, "path": f"images/{coach_name}.png"}
     # 해당 코치의 주접 리스트만 표현하도록 업데이트
     filter_option = request.args.get('filter', 'all')  # 기본값 all
+    # 아래 코드로 인해서 경로 변수는 사용 안 함. (추후 삭제)
+    sort_order = request.args.get('sort_order', 'newest')  # 기본값 newest
     joojeops = get_joojeops_by_coach_name(
         coach_name, sort_order, filter_option=filter_option)
 
