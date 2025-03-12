@@ -4,7 +4,7 @@ from flask import Flask, redirect, request, jsonify, render_template, url_for
 from flask_dance.contrib.google import make_google_blueprint, google
 from flask_dance.contrib.github import make_github_blueprint, github
 import jwt
-import gpt
+import gemini
 from pymongo import MongoClient
 from flask_apscheduler import APScheduler
 import slack
@@ -214,8 +214,8 @@ def logout():
 def generate_joojeop(coach_name, sort_order, keyword):
     print("generate_joojeop 함수 호출")
     user_id = decode_jwt_from_cookie()
-    content = gpt.get_gpt_response(
-        f"{coach_name}에 대한 주접 하나 만들어줘. 아재개그 스타일 20글자 이내로. 키워드:{keyword}")
+    content = gemini.get_gemini_response(
+        f"{coach_name}에 대한 주접 하나 만들어줘. 트위터 말투. 키워드:{keyword}")
     print(content)
 
     return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order, content=content))
