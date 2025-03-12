@@ -70,6 +70,9 @@ def home():
         print
         filter_option = request.args.get('filter', 'all')  # 기본값 all
         sorted_joojeops = get_joojeops(order, filter_option=filter_option)
+        for joojeop in sorted_joojeops:
+            print(
+                f"Joojeop ID: {joojeop['_id']} - isDisLiked: {joojeop.get('isDisLiked')}")
         return render_template("index.html", user=user, coaches=coaches, joojeops=sorted_joojeops)
     else:
         return redirect(url_for("login"))
@@ -471,6 +474,8 @@ def get_joojeops(order='newest', limit=None, filter_option='all'):
         ) else True
         joojeop['isLiked'] = True if decode_jwt_from_cookie(
         ) in joojeop.get('liked_by', []) else False
+        joojeop['isDisLiked'] = True if decode_jwt_from_cookie(
+        ) in joojeop.get('disliked_by', []) else False
 
     return sorted_joojeops
 
