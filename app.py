@@ -160,9 +160,11 @@ def google_login():
 
     return "Google 로그인 실패", 403
 
+
 @app.route("/login")
 def login():
     return render_template("login.html")
+
 
 @app.route("/github")  # ✅ GitHub 로그인 처리
 def github_login():
@@ -212,11 +214,6 @@ def github_login():
         return response
 
     return "GitHub 로그인 실패", 403
-
-
-@app.route("/login")  # ✅ 로그인 페이지
-def login():
-    return render_template("login.html")
 
 
 @app.route("/logout")  # ✅ 로그아웃 처리
