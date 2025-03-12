@@ -101,7 +101,7 @@ def like(joojeop_id):
     # 클라이언트에서 선택한 주접의 id를 받아오기
     # 해당 주접의 like 수를 1 증가시키기
     user_id = decode_jwt_from_cookie()
-    like_joojeop(int(joojeop_id), user_id)
+    like_joojeop(joojeop_id, user_id)
     return redirect(url_for("home"))
 
 
@@ -300,7 +300,7 @@ def like_joojeop(joojeop_id, user_id):
         db.joojeops.update_one({"_id": object_id}, {"$inc": {"like": -1}})
         db.joojeops.update_one({"_id": object_id}, {
                                "$pull": {"liked_by": user_id}})
-    if joojeop:
+    else:
         db.joojeops.update_one({"_id": object_id}, {"$inc": {"like": 1}})
         db.joojeops.update_one({"_id": object_id}, {
                                "$push": {"liked_by": user_id}})
@@ -397,8 +397,6 @@ def get_joojeops(order='newest', limit=None):
     # id를 string으로 변환
     for joojeop in sorted_joojeops:
         joojeop['_id'] = str(joojeop['_id'])
-        joojeop['isAuthor'] = False if joojeop['author_id'] != decode_jwt_from_cookie() else True
-        
 
     return sorted_joojeops
 
