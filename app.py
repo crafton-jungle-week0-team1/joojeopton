@@ -687,10 +687,10 @@ def get_today_worst_joojeops_by_coach_id(coach_id, limit=5):
 # 코치님 이름으로 만들어진 주접 가져와서 메세지 만들기기
 
 
-def make_joojeop_message_for_coach(coach_id, best_limit, worst_limit):
-    best_list = get_today_best_joojeops_by_coach_id(coach_id, best_limit)
+def make_joojeop_message_for_coach(coach_name, best_limit, worst_limit):
+    best_list = get_today_best_joojeops_by_coach_id(coach_name, best_limit)
     worst_list = get_today_worst_joojeops_by_coach_id(
-        coach_id, worst_limit)
+        coach_name, worst_limit)
     best_ids = {item['_id'] for item in best_list}
     worst_list = [item for item in worst_list if item['_id'] not in best_ids]
 
