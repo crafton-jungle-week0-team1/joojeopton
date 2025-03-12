@@ -85,8 +85,9 @@ def joojeop(coach_name, sort_order):
     coach = {"name": coach_name, "path": f"images/{coach_name}.png"}
     # 해당 코치의 주접 리스트만 표현하도록 업데이트
     filter_option = request.args.get('filter', 'all')  # 기본값 all
-    joojeops = get_joojeops_by_coach_name(coach_name, sort_order, filter_option=filter_option)
-    
+    joojeops = get_joojeops_by_coach_name(
+        coach_name, sort_order, filter_option=filter_option)
+
     # get content from query string if exists
     content = request.args.get('content', '')
 
@@ -102,6 +103,7 @@ def like(joojeop_id):
     like_joojeop(joojeop_id, user_id)
     return redirect(url_for("home"))
 
+
 @app.route('/joojeop/<joojeop_id>/delete', methods=['POST'])
 def delete_joojeop(joojeop_id):
     # 클라이언트에서 선택한 주접의 id를 받아오기
@@ -109,6 +111,7 @@ def delete_joojeop(joojeop_id):
     object_id = ObjectId(joojeop_id)
     db.joojeops.delete_one({"_id": object_id})
     return redirect(url_for("home"))
+
 
 @app.route("/google")  # ✅ Google 로그인 처리
 def google_login():
@@ -334,12 +337,13 @@ def get_joojeops_by_coach_name(coach_name, order='newest', limit=None, filter_op
             joojeops, key=lambda x: x['date'], reverse=False)
     else:
         sorted_joojeops = joojeops
-    
-    # 필터링    
-    if filter_option == 'all':  
+
+    # 필터링
+    if filter_option == 'all':
         pass
     elif filter_option == 'mine':
-        sorted_joojeops = [joojeop for joojeop in sorted_joojeops if joojeop['author_id'] == decode_jwt_from_cookie()]
+        sorted_joojeops = [
+            joojeop for joojeop in sorted_joojeops if joojeop['author_id'] == decode_jwt_from_cookie()]
 
     if limit:
         sorted_joojeops = sorted_joojeops[:limit]
@@ -347,8 +351,10 @@ def get_joojeops_by_coach_name(coach_name, order='newest', limit=None, filter_op
     # _id를 string으로 변환
     for joojeop in sorted_joojeops:
         joojeop['_id'] = str(joojeop['_id'])
-        joojeop['isAuthor'] = False if joojeop['author_id'] != decode_jwt_from_cookie() else True
-        joojeop['isLiked'] = True if decode_jwt_from_cookie() in joojeop.get('liked_by', []) else False
+        joojeop['isAuthor'] = False if joojeop['author_id'] != decode_jwt_from_cookie(
+        ) else True
+        joojeop['isLiked'] = True if decode_jwt_from_cookie(
+        ) in joojeop.get('liked_by', []) else False
 
     return sorted_joojeops
 
@@ -402,20 +408,23 @@ def get_joojeops(order='newest', limit=None, filter_option='all'):
     else:
         sorted_joojeops = joojeops
 
-    # 필터링    
-    if filter_option == 'all':  
+    # 필터링
+    if filter_option == 'all':
         pass
     elif filter_option == 'mine':
-        sorted_joojeops = [joojeop for joojeop in sorted_joojeops if joojeop['author_id'] == decode_jwt_from_cookie()]
-    
+        sorted_joojeops = [
+            joojeop for joojeop in sorted_joojeops if joojeop['author_id'] == decode_jwt_from_cookie()]
+
     if limit:
         sorted_joojeops = sorted_joojeops[:limit]
 
     # id를 string으로 변환
     for joojeop in sorted_joojeops:
         joojeop['_id'] = str(joojeop['_id'])
-        joojeop['isAuthor'] = False if joojeop['author_id'] != decode_jwt_from_cookie() else True
-        joojeop['isLiked'] = True if decode_jwt_from_cookie() in joojeop.get('liked_by', []) else False
+        joojeop['isAuthor'] = False if joojeop['author_id'] != decode_jwt_from_cookie(
+        ) else True
+        joojeop['isLiked'] = True if decode_jwt_from_cookie(
+        ) in joojeop.get('liked_by', []) else False
 
     return sorted_joojeops
 
@@ -424,15 +433,11 @@ def get_today_joojeops_by_coach_name(coach_name):
     """
     오늘 작성된 주접들을 코치 이름을 입력받아 좋아요 순으로 반환하고, 10개까지만 반환하는 함수
     """
-    today = datetime.datetime.now().date()  # 현재 날짜 (시간 제외)
-    start_of_day = datetime.datetime.combine(
-        today, datetime.time.min)  # 00:00:00
-    end_of_day = datetime.datetime.combine(
-        today, datetime.time.max)    # 23:59:59.999999
+    today_str = datetime.datetime.now().date()  # 현재 날짜 (시간 제외)
 
     query = {
         "coach_name": coach_name,
-        "date": {"$gte": start_of_day, "$lt": end_of_day}  # 오늘 날짜 범위 조회
+        "date": {"$regex": f"^{today_str}"}  # 날짜 문자열이 오늘 날짜로 시작하는 문서 조회
     }
     joojeops = list(db.joojeops.find(query))
 
@@ -463,7 +468,7 @@ def scheduled_job():
 
 
 scheduler.add_job(id="scheduled_job", func=scheduled_job,
-                  trigger="cron", hour=11, minute=9)
+                  trigger="cron", hour=23, minute=00)
 
 
 if __name__ == '__main__':
