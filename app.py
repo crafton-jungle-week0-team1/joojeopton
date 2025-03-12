@@ -4,7 +4,7 @@ from flask import Flask, redirect, request, jsonify, render_template, url_for
 from flask_dance.contrib.google import make_google_blueprint, google
 from flask_dance.contrib.github import make_github_blueprint, github
 import jwt
-import gpt
+import gemini
 from pymongo import MongoClient
 from flask_apscheduler import APScheduler
 import slack
@@ -19,7 +19,7 @@ scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()
 
-os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # HTTP에서도 사용 가능하도록 설정
+os.environ["OAUTHLIB_INSECURE_TRANjSPORT"] = "1"  # HTTP에서도 사용 가능하도록 설정
 app.secret_key = os.urandom(24)
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
@@ -66,7 +66,7 @@ def home():
     ]
     if user:
         order = request.args.get('order', 'newest')  # 기본값 newest
-        print(order)
+        print
         filter_option = request.args.get('filter', 'all')  # 기본값 all
         sorted_joojeops = get_joojeops(order, filter_option=filter_option)
         return render_template("index.html", user=user, coaches=coaches, joojeops=sorted_joojeops)
@@ -160,6 +160,9 @@ def google_login():
 
     return "Google 로그인 실패", 403
 
+@app.route("/login")
+def login():
+    return render_template("login.html")
 
 @app.route("/github")  # ✅ GitHub 로그인 처리
 def github_login():
@@ -227,8 +230,8 @@ def logout():
 def generate_joojeop(coach_name, sort_order, keyword):
     print("generate_joojeop 함수 호출")
     user_id = decode_jwt_from_cookie()
-    content = gpt.get_gpt_response(
-        f"{coach_name}에 대한 주접 하나 만들어줘. 아재개그 스타일 20글자 이내로. 키워드:{keyword}")
+    content = gemini.get_gemini_response(
+        f"{coach_name}에 대한 주접 하나 만들어줘. 트위터 말투. 키워드:{keyword}")
     print(content)
 
     return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order, content=content))
