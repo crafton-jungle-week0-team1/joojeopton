@@ -98,6 +98,15 @@ def save_coach_route():
     save_coach(coach)
     return redirect(url_for("admin"))
 
+@app.route('/admin/delete-coach', methods=['POST'])
+def delete_coach():
+    coach_id = request.form.get("coach_id")
+    user_id = decode_jwt_from_cookie()
+    if user_id not in ADMIN_LIST:
+        return redirect(url_for("home"))
+    db.coaches.delete_one({"_id": ObjectId(coach_id)})
+    return redirect(url_for("admin"))
+
 @app.route('/', methods=['GET'])  # 인덱스 페이지
 def home():
     user_id = decode_jwt_from_cookie()
@@ -338,7 +347,10 @@ def admin():
     user_id = decode_jwt_from_cookie()
     if user_id not in ADMIN_LIST:
         return redirect(url_for("home"))
-    return render_template("admin.html")
+    coaches = list(db.coaches.find())
+    for coach in coaches:
+        coach["id"] = str(coach["_id"])
+    return render_template("admin.html", coaches=coaches)
 
 
 # 슬랙 메세지 전송 시간 설정
