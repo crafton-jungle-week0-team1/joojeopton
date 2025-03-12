@@ -88,7 +88,6 @@ def joojeop(coach_name, sort_order):
     joojeops = get_joojeops_by_coach_name(
         coach_name, sort_order, filter_option=filter_option)
 
-    # get content from query string if exists
     content = request.args.get('content', '')
 
     # 코치 데이터 템플릿에 넘겨주기
@@ -101,6 +100,15 @@ def like(joojeop_id):
     # 해당 주접의 like 수를 1 증가시키기
     user_id = decode_jwt_from_cookie()
     like_joojeop(joojeop_id, user_id)
+    return redirect(url_for("home"))
+
+
+@app.route('/joojeop/<joojeop_id>/dislike', methods=['POST'])
+def dislike(joojeop_id):
+    # 클라이언트에서 선택한 주접의 id를 받아오기
+    # 해당 주접의 dislike 수를 1 증가시키기
+    user_id = decode_jwt_from_cookie()
+    dislike_joojeop(joojeop_id, user_id)
     return redirect(url_for("home"))
 
 
@@ -203,6 +211,11 @@ def github_login():
     return "GitHub 로그인 실패", 403
 
 
+@app.route("/login")  # ✅ 로그인 페이지
+def login():
+    return render_template("login.html")
+
+
 @app.route("/logout")  # ✅ 로그아웃 처리
 def logout():
     response = redirect(url_for("login"))
@@ -291,7 +304,9 @@ def save_joojeop(author_id, author_name, coach_name, content):
         "date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "like": 0,
         "coach_name": coach_name,
-        "liked_by": []
+        "liked_by": [],
+        "dislike": 0,
+        "disliked_by": []
     }
     db.joojeops.insert_one(joojeop)
 
@@ -310,6 +325,23 @@ def like_joojeop(joojeop_id, user_id):
         db.joojeops.update_one({"_id": object_id}, {"$inc": {"like": 1}})
         db.joojeops.update_one({"_id": object_id}, {
                                "$push": {"liked_by": user_id}})
+    return True
+
+
+def dislike_joojeop(joojeop_id, user_id):
+    """
+    주접에 싫어요를 누르는 함수
+    """
+    object_id = ObjectId(joojeop_id)
+    joojeop = db.joojeops.find_one({"_id": object_id})
+    if user_id in joojeop["disliked_by"]:
+        db.joojeops.update_one({"_id": object_id}, {"$inc": {"dislike": -1}})
+        db.joojeops.update_one({"_id": object_id}, {
+                               "$pull": {"disliked_by": user_id}})
+    else:
+        db.joojeops.update_one({"_id": object_id}, {"$inc": {"dislike": 1}})
+        db.joojeops.update_one({"_id": object_id}, {
+                               "$push": {"disliked_by": user_id}})
     return True
 
 
@@ -355,6 +387,8 @@ def get_joojeops_by_coach_name(coach_name, order='newest', limit=None, filter_op
         ) else True
         joojeop['isLiked'] = True if decode_jwt_from_cookie(
         ) in joojeop.get('liked_by', []) else False
+        joojeop['isDisLiked'] = True if decode_jwt_from_cookie(
+        ) in joojeop.get('disliked_by', []) else False
 
     return sorted_joojeops
 
