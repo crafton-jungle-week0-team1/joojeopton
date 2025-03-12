@@ -79,7 +79,10 @@ def login():
 
 @app.route('/joojeop/<coach_name>/<sort_order>', methods=['GET'])
 def joojeop(coach_name, sort_order):
-    print("joojeop 함수 호출")
+    user_id = decode_jwt_from_cookie()
+    if user_id is None:
+        return redirect(url_for("login"))
+    user = get_user_by_user_id(user_id)
     # 클라이언트에서 선택한 코치 이름 path variable로 받아오기
     # 코치 딕셔너리 생성
     coach = {"name": coach_name, "path": f"images/{coach_name}.png"}
@@ -89,7 +92,7 @@ def joojeop(coach_name, sort_order):
     content = request.args.get('content', '')
 
     # 코치 데이터 템플릿에 넘겨주기
-    return render_template("joojeop.html", coach=coach, joojeops=joojeops, sort_order=sort_order, content=content)
+    return render_template("joojeop.html", coach=coach, joojeops=joojeops, sort_order=sort_order, content=content, user=user)
 
 
 @app.route('/joojeop/<joojeop_id>/like', methods=['POST'])
