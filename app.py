@@ -105,6 +105,13 @@ def like(joojeop_id):
     like_joojeop(joojeop_id, user_id)
     return redirect(url_for("home"))
 
+@app.route('/joojeop/<joojeop_id>/delete', methods=['POST'])
+def delete_joojeop(joojeop_id):
+    # 클라이언트에서 선택한 주접의 id를 받아오기
+    # 해당 주접 삭제
+    object_id = ObjectId(joojeop_id)
+    db.joojeops.delete_one({"_id": object_id})
+    return redirect(url_for("home"))
 
 @app.route("/google")  # ✅ Google 로그인 처리
 def google_login():
@@ -337,6 +344,8 @@ def get_joojeops_by_coach_name(coach_name, order='newest', limit=None):
     # _id를 string으로 변환
     for joojeop in sorted_joojeops:
         joojeop['_id'] = str(joojeop['_id'])
+        joojeop['isAuthor'] = False if joojeop['author_id'] != decode_jwt_from_cookie() else True
+        joojeop['isLiked'] = True if decode_jwt_from_cookie() in joojeop.get('liked_by', []) else False
 
     return sorted_joojeops
 
@@ -396,6 +405,8 @@ def get_joojeops(order='newest', limit=None):
     # id를 string으로 변환
     for joojeop in sorted_joojeops:
         joojeop['_id'] = str(joojeop['_id'])
+        joojeop['isAuthor'] = False if joojeop['author_id'] != decode_jwt_from_cookie() else True
+        joojeop['isLiked'] = True if decode_jwt_from_cookie() in joojeop.get('liked_by', []) else False
 
     return sorted_joojeops
 
