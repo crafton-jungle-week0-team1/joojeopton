@@ -19,7 +19,7 @@ scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()
 
-os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # HTTP에서도 사용 가능하도록 설정
+os.environ["OAUTHLIB_INSECURE_TRANjSPORT"] = "1"  # HTTP에서도 사용 가능하도록 설정
 app.secret_key = os.urandom(24)
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
