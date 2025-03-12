@@ -72,6 +72,7 @@ def home():
     return render_template("index.html", user=user, coaches=coaches, joojeops=sorted_joojeops)
 
 
+# 주접 생성/작성 페이지
 @app.route('/joojeop/<coach_name>/<sort_order>', methods=['GET'])
 def joojeop(coach_name, sort_order):
     user_id = decode_jwt_from_cookie()
@@ -92,6 +93,7 @@ def joojeop(coach_name, sort_order):
     return render_template("joojeop.html", coach=coach, joojeops=joojeops, sort_order=sort_order, content=content, user=user)
 
 
+# 주접 좋아요
 @app.route('/joojeop/<joojeop_id>/like', methods=['POST'])
 def like(joojeop_id):
     # 클라이언트에서 선택한 주접의 id를 받아오기
@@ -101,6 +103,7 @@ def like(joojeop_id):
     return redirect(url_for("home"))
 
 
+# 주접 싫어요
 @app.route('/joojeop/<joojeop_id>/dislike', methods=['POST'])
 def dislike(joojeop_id):
     # 클라이언트에서 선택한 주접의 id를 받아오기
@@ -110,6 +113,7 @@ def dislike(joojeop_id):
     return redirect(url_for("home"))
 
 
+# 주접 삭제
 @app.route('/joojeop/<joojeop_id>/delete', methods=['POST'])
 def delete_joojeop(joojeop_id):
     # 클라이언트에서 선택한 주접의 id를 받아오기
@@ -129,6 +133,7 @@ def delete_joojeop(joojeop_id):
     return redirect(url_for("home"))
 
 
+# 구글 로그인
 @app.route("/google")  # ✅ Google 로그인 처리
 def google_login():
 
@@ -169,11 +174,13 @@ def google_login():
     return "Google 로그인 실패", 403
 
 
+# 로그인 페이지
 @app.route("/login")
 def login():
     return render_template("login.html")
 
 
+# 깃허브 로그인
 @app.route("/github")  # ✅ GitHub 로그인 처리
 def github_login():
     if not github.authorized:
@@ -224,6 +231,7 @@ def github_login():
     return "GitHub 로그인 실패", 403
 
 
+# 로그아웃
 @app.route("/logout")  # ✅ 로그아웃 처리
 def logout():
     response = redirect(url_for("login"))
@@ -231,6 +239,7 @@ def logout():
     return response
 
 
+# Gemini 기반 주접 생성
 @app.route("/joojeop/<coach_name>/<sort_order>/<keyword>/generate/gemini", methods=["POST"])
 def generate_joojeop_gemini(coach_name, sort_order, keyword):
     print("generate_joojeop 함수 호출")
@@ -242,6 +251,7 @@ def generate_joojeop_gemini(coach_name, sort_order, keyword):
     return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order, content=content))
 
 
+# GPT 기반 주접 생성
 @app.route("/joojeop/<coach_name>/<sort_order>/<keyword>/generate/gpt", methods=["POST"])
 def generate_joojeop_gpt(coach_name, sort_order, keyword):
     print("generate_joojeop 함수 호출")
@@ -253,6 +263,7 @@ def generate_joojeop_gpt(coach_name, sort_order, keyword):
     return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order, content=content))
 
 
+# 주접 저장
 @app.route("/joojeop/<coach_name>/<sort_order>/save", methods=["POST"])
 def save_joojeop_route(coach_name, sort_order):
     user_id = decode_jwt_from_cookie()
@@ -263,9 +274,8 @@ def save_joojeop_route(coach_name, sort_order):
 
 # TODO: 관리자 페이지 라우팅
 
+
 # 슬랙 메세지 전송 시간 설정
-
-
 @app.route("/slack/time", methods=["POST"])
 def slack_time():
     print("slack_time 함수 호출")
