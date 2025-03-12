@@ -168,7 +168,7 @@
                     <span class="joojeop-date">{{ joojeop.date }}</span>
                     <span class="joojeop-likes flex items-center">
                         <!-- like-btn에 cursor-pointer를 추가해 클릭 가능함을 표시 -->
-                        <span class="like-btn cursor-pointer">
+                        <span class="like-btn {% if isLiked %} liked {% endif %} cursor-pointer">
                             <input type="hidden" name="joojeop_id" value="{{ joojeop._id }}">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor" stroke-width="2">

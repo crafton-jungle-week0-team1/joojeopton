@@ -389,6 +389,8 @@ def get_joojeops(order='newest', limit=None):
     # id를 string으로 변환
     for joojeop in sorted_joojeops:
         joojeop['_id'] = str(joojeop['_id'])
+        joojeop['isAuthor'] = False if joojeop['author_id'] != decode_jwt_from_cookie() else True
+        
 
     return sorted_joojeops
 
