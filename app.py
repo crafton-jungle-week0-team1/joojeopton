@@ -10,6 +10,7 @@ from pymongo import MongoClient
 from flask_apscheduler import APScheduler
 import slack
 from bson.objectid import ObjectId
+from flask import jsonify
 
 client = MongoClient("mongodb://localhost:27017/")
 db = client.jujeopton
@@ -258,6 +259,28 @@ def save_joojeop_route(coach_name, sort_order):
     content = request.form.get("content")
     save_joojeop(user_id, user["name"], coach_name, content)
     return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order))
+
+# TODO: 관리자 페이지 라우팅
+
+# 슬랙 메세지 전송 시간 설정
+
+
+@app.route("/slack/time", methods=["POST"])
+def slack_time():
+    hour = int(request.form.get("time"))
+    minute = int(request.form.get("minute"))
+
+    try:
+        scheduler.modify_job("scheduled_job", trigger="cron",
+                             hour=hour, minute=minute)
+        response = {"success": True,
+                    "message": f"Updated schedule to {hour}:{minute}"}
+        status_code = 200
+    except Exception as e:
+        response = {"success": False, "error": str(e)}
+        status_code = 400
+
+    return jsonify(response), status_code
 
 
 def get_user_and_authorization_by_jwt():
