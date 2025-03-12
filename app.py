@@ -229,9 +229,15 @@ def generate_joojeop(coach_name, sort_order, keyword):
 def save_joojeop_route(coach_name, sort_order):
     print("save_joojeop 함수 호출")
     user_id = decode_jwt_from_cookie()
+    user = get_user_by_user_id(user_id)
+    print(user)
     content = request.form.get("content")
-    save_joojeop(user_id, user_id, coach_name, content)
+    save_joojeop(user_id, user["name"], coach_name, content)
     return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order))
+
+
+def get_user_by_user_id(user_id):
+    return db.users.find_one({"user_id": user_id})
 
 
 def generate_jwt(user_id: str, secret_key: str, expiration_hours: int = 1) -> str:
