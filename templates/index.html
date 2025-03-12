@@ -1,52 +1,64 @@
 <!DOCTYPE html>
 <html>
 
-<head>
-    <title>{{ title }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    <style>
-        /* 기본 하트: fill:none, stroke는 red (혹은 currentColor) */
-        .like-btn svg {
-            transition: fill 0.3s ease, stroke 0.3s ease;
-        }
-
-        /* liked 클래스가 추가되면, 채워진 빨간 하트 */
-        .like-btn.liked svg {
-            fill: red;
-            stroke: red;
-        }
-    </style>
-    <script>
-        // 기존 URL에 query string 파라미터를 추가하거나 업데이트하는 함수
-        function updateQueryStringParameter(uri, key, value) {
-            var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
-            var separator = uri.indexOf('?') !== -1 ? "&" : "?";
-            if (uri.match(re)) {
-                return uri.replace(re, '$1' + key + "=" + value + '$2');
-            } else {
-                return uri + separator + key + "=" + value;
+    <head>
+        <title>{{ title }}</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+        <style>
+            /* 기본 하트: fill:none, stroke는 red (혹은 currentColor) */
+            .like-btn svg {
+                transition: fill 0.3s ease, stroke 0.3s ease;
             }
-        }
-        $(document).ready(function () {
-            $('.like-btn').on('click', function (e) {
-                e.preventDefault();
-                let joojeop_id = $(this).find('input[name="joojeop_id"]').val();
-                $.post(`/joojeop/${joojeop_id}/like`, {
 
-                }, function (data) {
-                    location.reload();
-                });
-            });
+            /* liked 클래스가 추가되면, 채워진 빨간 하트 */
+            .like-btn.liked svg {
+                fill: red;
+                stroke: red;
+            }
+        </style>
+        <script>
+            // 기존 URL에 query string 파라미터를 추가하거나 업데이트하는 함수
+            function updateQueryStringParameter(uri, key, value) {
+                var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+                var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+                if (uri.match(re)) {
+                    return uri.replace(re, '$1' + key + "=" + value + '$2');
+                } else {
+                    return uri + separator + key + "=" + value;
+                }
+            }
+            $(document).ready(function () {
+                $('.like-btn').on('click', function (e) {
 
-            $(".dislike-btn").on("click", function (e) {
-                e.preventDefault();
-                let joojeop_id = $(this).find('input[name="joojeop_id"]').val();
-                $.post(`/joojeop/${joojeop_id}/dislike`, {}, function (data) {
-                    location.reload();
+                    {% if not user %}
+                        window.location.href = "/login";
+                        return;
+                    {% endif %}
+
+                    e.preventDefault();
+                    let joojeop_id = $(this).find('input[name="joojeop_id"]').val();
+                    $.post(`/joojeop/${joojeop_id}/like`, {
+
+                    }, function (data) {
+                        location.reload();
+                    });
                 });
-            });
+
+                $(".dislike-btn").on("click", function (e) {
+
+                    {% if not user %}
+                        window.location.href = "/login";
+                        return;
+                    {% endif %}
+
+                    e.preventDefault();
+                    let joojeop_id = $(this).find('input[name="joojeop_id"]').val();
+                    $.post(`/joojeop/${joojeop_id}/dislike`, {}, function (data) {
+                        location.reload();
+                    });
+                });
 
             $('.delete-btn').on('click', function (e) {
                 e.preventDefault();
@@ -62,11 +74,17 @@
                 window.location.href = newUrl;
             });
 
-            // "내주접" 버튼 클릭 시: 쿼리 파라미터 filter=mine 추가
-            $('.my-joojeop-btn').on('click', function () {
-                var newUrl = updateQueryStringParameter(window.location.href, 'filter', 'mine');
-                window.location.href = newUrl;
-            });
+                // "내주접" 버튼 클릭 시: 쿼리 파라미터 filter=mine 추가
+                $('.my-joojeop-btn').on('click', function () {
+
+                    {% if not user %}
+                        window.location.href = "/login";
+                        return;
+                    {% endif %}
+
+                    var newUrl = updateQueryStringParameter(window.location.href, 'filter', 'mine');
+                    window.location.href = newUrl;
+                });
 
             //정렬 할당 함수들
             $('.sort-btn.newest').on('click', function () {
@@ -91,22 +109,26 @@
     </script>
 </head>
 
-<body>
-    <div>
-        <div class="flex items-center justify-between w-full p-4 border-b">
-            <div class="flex flex-col">
-                <a href="/">
-                    <h1 class="text-3xl font-bold text-gray-500">정글 주접톤</h1>
-                </a>
-                <p class="text-sm text-gray-400">crafton jungle</p>
-            </div>
-            <div class="flex items-center space-x-4">
-                <img src="{{ user.picture }}" alt="{{ user.name }}'s profile picture" class="w-12 h-12 rounded-full">
-                <a>{{ user.name }}의 주접</a>
-                <a href="/logout">로그아웃</a>
+    <body>
+        <div>
+            <div class="flex items-center justify-between w-full p-4 border-b">
+                <div class="flex flex-col">
+                    <a href="/">
+                        <h1 class="text-3xl font-bold text-gray-500">정글 주접톤</h1>
+                    </a>
+                    <p class="text-sm text-gray-400">crafton jungle</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    {% if user %}
+                        <img src="{{ user.picture }}" alt="{{ user.name }}'s profile picture" class="w-12 h-12 rounded-full">
+                        <a>{{ user.name }}의 주접</a>
+                        <a href="/logout">로그아웃</a>
+                    {% else %}
+                        <a href="/login" class="mr-2">로그인</a>
+                    {% endif %}
+                </div>
             </div>
         </div>
-    </div>
 
     <div class="container grid grid-cols-2 divide-x-2">
         <div class="container profile p-10 grid grid-cols-4 gap-4">
@@ -122,23 +144,23 @@
             {% endfor %}
 
 
-        </div>
-        <div class="container p-5">
-            <button
-                class="all-joojeop-btn px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">모든주접</button>
-            <button
-                class="my-joojeop-btn px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">내주접</button>
-            <!-- 드롭다운 컨테이너 -->
-            <div id="dropdownContainer" class="relative inline-block">
-                <!-- 드롭다운 버튼 -->
-                <button id="dropdownButton"
-                    class="px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 flex items-center">
-                    정렬
-                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
+            </div>
+            <div class="container p-5">
+                <button
+                    class="all-joojeop-btn px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">모든주접</button>
+                <button
+                    class="my-joojeop-btn px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">내주접</button>
+                <!-- 드롭다운 컨테이너 -->
+                <div id="dropdownContainer" class="relative inline-block">
+                    <!-- 드롭다운 버튼 -->
+                    <button id="dropdownButton"
+                        class="px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 flex items-center">
+                        정렬
+                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
 
                 <!-- 드롭다운 메뉴 (초기에는 hidden 클래스 적용) -->
                 <div id="dropdownMenu"
@@ -192,10 +214,10 @@
                     </button>
                     {% endif %}
 
+                    </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
-</body>
+    </body>
 
 </html>

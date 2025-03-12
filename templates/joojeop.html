@@ -54,9 +54,13 @@
             let sortOrder = "{{ sort_order }}";
 
             $('.generate-btn.gemini').on('submit', function (e) {
+                // Get sort_order from current URL
                 const urlParams = new URLSearchParams(window.location.search);
                 let currentSortOrder = urlParams.get('sort_order') || sortOrder;
                 sortOrder = currentSortOrder; // Update the sortOrder variable
+                // Get filter from current URL
+                let currentFilter = urlParams.get('filter') || 'all';
+                filter = currentFilter; 
                 if (!selectedKeyword) {
                     alert("키워드를 하나 이상 선택해주세요!");
                     //e.preventDefault(); // 폼 전송 중단
@@ -64,19 +68,23 @@
                 }
                 this.action = `/joojeop/${coachName}/${encodeURIComponent(
                     selectedKeyword
-                )}/generate/gemini?sort_order=${sortOrder}`;
+                )}/generate/gemini?sort_order=${sortOrder}&filter=${filter}`;
             });
             
             $('.generate-btn.gpt').on('submit', function (e) {
+                // Get sort_order from current URL
                 const urlParams = new URLSearchParams(window.location.search);
                 let currentSortOrder = urlParams.get('sort_order') || sortOrder;
                 sortOrder = currentSortOrder; // Update the sortOrder variable
+                // Get filter from current URL
+                let currentFilter = urlParams.get('filter') || 'all';
+                filter = currentFilter; // Update the sortOrder variable
                 if (!selectedKeyword) {
                     alert("키워드를 하나 이상 선택해주세요!");
                     //e.preventDefault(); // 폼 전송 중단
                     return false;
                 }
-                this.action = `/joojeop/${coachName}/${encodeURIComponent(selectedKeyword)}/generate/gpt?sort_order=${sortOrder}`;
+                this.action = `/joojeop/${coachName}/${encodeURIComponent(selectedKeyword)}/generate/gpt?sort_order=${sortOrder}&filter=${filter}`;
             });
 
             $(".save-btn").on("click", function (e) {
@@ -92,6 +100,9 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 let currentSortOrder = urlParams.get('sort_order') || sortOrder;
                 sortOrder = currentSortOrder; // Update the sortOrder variable
+                // Get filter from current URL
+                let currentFilter = urlParams.get('filter') || 'all';
+                filter = currentFilter; // Update the sortOrder variable
                 
                 $.post(
                     `/joojeop/${encodeURIComponent(coachName)}/${sortOrder}/save`,
@@ -99,7 +110,7 @@
                         content: content,
                     },
                     function (data) {
-                        window.location.href = `/joojeop/${encodeURIComponent(coachName)}?sort_order=${sortOrder}`;
+                        window.location.href = `/joojeop/${encodeURIComponent(coachName)}?sort_order=${sortOrder}&filter=${filter}`;
                     }
                 );
             });

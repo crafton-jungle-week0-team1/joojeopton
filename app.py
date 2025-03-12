@@ -10,6 +10,7 @@ from pymongo import MongoClient
 from flask_apscheduler import APScheduler
 import slack
 from bson.objectid import ObjectId
+from flask import jsonify
 
 client = MongoClient("mongodb://localhost:27017/")
 db = client.jujeopton
@@ -51,9 +52,9 @@ app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET")
 @app.route('/', methods=['GET'])
 def home():
     user_id = decode_jwt_from_cookie()
-    if user_id is None:
-        return redirect(url_for("login"))  # jwt가 없을 경우 로그인 페이지로 이동
-    user = db.users.find_one({"user_id": user_id})
+    user = None
+    if user_id is not None:
+        user = get_user_by_user_id(user_id)
     # 코치 DB, 픽스 값으로 유지
     coaches = [
         {"name": "김정민", "path": "images/김정민.png"},
@@ -65,18 +66,10 @@ def home():
         {"name": "이동석", "path": "images/이동석.png"},
         {"name": "이승민", "path": "images/이승민.png"},
     ]
-    if user:
-        order = request.args.get('order', 'newest')  # 기본값 newest
-        print
-        filter_option = request.args.get('filter', 'all')  # 기본값 all
-        order = request.args.get('sort_order', 'newest')  # 기본값 newest
-        sorted_joojeops = get_joojeops(order, filter_option=filter_option)
-        for joojeop in sorted_joojeops:
-            print(
-                f"Joojeop ID: {joojeop['_id']} - isDisLiked: {joojeop.get('isDisLiked')}")
-        return render_template("index.html", user=user, coaches=coaches, joojeops=sorted_joojeops)
-    else:
-        return redirect(url_for("login"))
+    order = request.args.get('sort_order', 'newest')  # 기본값 newest
+    filter_option = request.args.get('filter', 'all')  # 기본값 all
+    sorted_joojeops = get_joojeops(order, filter_option=filter_option)
+    return render_template("index.html", user=user, coaches=coaches, joojeops=sorted_joojeops)
 
 
 @app.route('/joojeop/<coach_name>', methods=['GET'])
@@ -123,7 +116,17 @@ def dislike(joojeop_id):
 def delete_joojeop(joojeop_id):
     # 클라이언트에서 선택한 주접의 id를 받아오기
     # 해당 주접 삭제
+    user_id = decode_jwt_from_cookie()
+    if user_id is None:
+        return redirect(url_for("login"))
     object_id = ObjectId(joojeop_id)
+    joojeop = db.joojeops.find_one({"_id": object_id})
+    if not joojeop:
+        return "해당 주접이 존재하지 않습니다.", 404
+
+    user_id = decode_jwt_from_cookie()
+    if joojeop["author_id"] != user_id:
+        return "삭제 권한이 없습니다.", 403
     db.joojeops.delete_one({"_id": object_id})
     return redirect(url_for("home"))
 
@@ -238,8 +241,9 @@ def generate_joojeop_gemini(coach_name, keyword):
         f"{coach_name}에 대한 주접 하나 만들어줘. 트위터 말투. 키워드:{keyword}")
     print(content)
     sort_order = request.args.get('sort_order', 'newest')
+    filter = request.args.get('filter', 'all')
 
-    return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order, content=content))
+    return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order, content=content, filter=filter))
 
 
 @app.route("/joojeop/<coach_name>/<keyword>/generate/gpt", methods=["POST"])
@@ -247,11 +251,12 @@ def generate_joojeop_gpt(coach_name, keyword):
     print("generate_joojeop 함수 호출")
     user_id = decode_jwt_from_cookie()
     sort_order = request.args.get('sort_order', 'newest')
+    filter = request.args.get('filter', 'all')
     content = gpt.get_gpt_response(
         f"{coach_name}에 대한 주접 하나 만들어줘. 아재개그 스타일 20글자 이내로. 키워드:{keyword}")
     print(content)
 
-    return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order, content=content))
+    return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order, content=content, filter=filter))
 
 
 @app.route("/joojeop/<coach_name>/<sort_order>/save", methods=["POST"])
@@ -261,6 +266,37 @@ def save_joojeop_route(coach_name, sort_order):
     content = request.form.get("content")
     save_joojeop(user_id, user["name"], coach_name, content)
     return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order))
+
+# TODO: 관리자 페이지 라우팅
+
+# 슬랙 메세지 전송 시간 설정
+
+
+@app.route("/slack/time", methods=["POST"])
+def slack_time():
+    print("slack_time 함수 호출")
+    hour = int(request.form.get("hour"))
+    minute = int(request.form.get("minute"))
+
+    try:
+        scheduler.modify_job("scheduled_job", trigger="cron",
+                             hour=hour, minute=minute)
+        response = {"success": True,
+                    "message": f"Updated schedule to {hour}:{minute}"}
+        status_code = 200
+    except Exception as e:
+        response = {"success": False, "error": str(e)}
+        status_code = 400
+
+    return jsonify(response), status_code
+
+
+def get_user_and_authorization_by_jwt():
+    user_id = decode_jwt_from_cookie()
+    if user_id is None:
+        return redirect(url_for("login"))  # jwt가 없을 경우 로그인 페이지로 이동
+    user = db.users.find_one({"user_id": user_id})
+    return user
 
 
 def get_user_by_user_id(user_id):
