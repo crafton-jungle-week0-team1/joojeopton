@@ -66,7 +66,7 @@ def home():
     ]
     if user:
         order = request.args.get('order', 'newest')  # 기본값 newest
-        print(order)
+        print
         filter_option = request.args.get('filter', 'all')  # 기본값 all
         sorted_joojeops = get_joojeops(order, filter_option=filter_option)
         return render_template("index.html", user=user, coaches=coaches, joojeops=sorted_joojeops)
@@ -149,6 +149,9 @@ def google_login():
 
     return "Google 로그인 실패", 403
 
+@app.route("/login")
+def login():
+    return render_template("login.html")
 
 @app.route("/github")  # ✅ GitHub 로그인 처리
 def github_login():
