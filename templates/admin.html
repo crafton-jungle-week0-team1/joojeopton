@@ -1,157 +1,235 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>관리자 페이지</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-
+  </head>
+  <body class="bg-gray-100 flex items-center justify-center min-h-screen">
     <div class="bg-white p-6 rounded-xl shadow-lg w-96">
-        <h2 class="text-xl font-semibold text-gray-700 mb-4">관리자 페이지</h2>
+      <h2 class="text-xl font-semibold text-gray-700 mb-4">관리자 페이지</h2>
 
-        <!-- 탭 메뉴 -->
-        <div class="flex border-b mb-4">
-            <button class="tab-btn px-4 py-2 border-b-2 border-blue-500 text-blue-500 focus:border-blue-500" data-tab="sendNow">즉시 발송</button>
-            <button class="tab-btn px-4 py-2 border-b-2 border-transparent text-gray-600 hover:text-blue-500 focus:border-blue-500" data-tab="sendOption">발송 옵션</button>
-            <button class="tab-btn px-4 py-2 border-b-2 border-transparent text-gray-600 hover:text-blue-500 focus:border-blue-500" data-tab="character">대상 추가</button>
+      <!-- 탭 메뉴 -->
+      <div class="flex border-b mb-4">
+        <button
+          class="tab-btn px-4 py-2 border-b-2 border-blue-500 text-blue-500 focus:border-blue-500"
+          data-tab="sendNow"
+        >
+          즉시 발송
+        </button>
+        <button
+          class="tab-btn px-4 py-2 border-b-2 border-transparent text-gray-600 hover:text-blue-500 focus:border-blue-500"
+          data-tab="sendOption"
+        >
+          발송 옵션
+        </button>
+        <button
+          class="tab-btn px-4 py-2 border-b-2 border-transparent text-gray-600 hover:text-blue-500 focus:border-blue-500"
+          data-tab="character"
+        >
+          대상 추가
+        </button>
+      </div>
+
+      <!-- 슬랙 즉시 발송 (초기 활성화) -->
+      <div id="sendNow" class="tab-content">
+        <div class="flex justify-end gap-2 mt-6">
+          <button
+            id="sendNow-btn"
+            class="px-4 py-2 text-white bg-red-500 rounded-lg hover:bg-red-600"
+          >
+            즉시 발송
+          </button>
+        </div>
+      </div>
+
+      <!-- 슬랙 발송 옵션 -->
+      <div id="sendOption" class="tab-content">
+        <label class="block text-sm font-medium text-gray-600">발송 시간</label>
+        <div class="flex gap-2 mt-1">
+          <select id="send-hour" class="w-1/2 p-2 border rounded-lg">
+            <script>
+              for (let i = 0; i < 24; i++)
+                document.write(`<option value="${i}">${i}시</option>`);
+            </script>
+          </select>
+          <select id="send-minute" class="w-1/2 p-2 border rounded-lg">
+            <script>
+              for (let i = 0; i < 60; i++)
+                document.write(`<option value="${i}">${i}분</option>`);
+            </script>
+          </select>
         </div>
 
-
-        <!-- 슬랙 즉시 발송 (초기 활성화) -->
-        <div id="sendNow" class="tab-content">
-            <div class="flex justify-end gap-2 mt-6">
-                <button id="sendNow-btn" class="px-4 py-2 text-white bg-red-500 rounded-lg hover:bg-red-600">즉시 발송</button>
-            </div>
+        <label class="block text-sm font-medium text-gray-600 mt-4"
+          >발송 메시지 개수</label
+        >
+        <div class="flex gap-2 mt-1">
+          <input
+            type="number"
+            id="best-message-count"
+            class="w-1/2 p-2 border rounded-lg"
+            placeholder="Best 개수"
+            min="0"
+          />
+          <input
+            type="number"
+            id="worst-message-count"
+            class="w-1/2 p-2 border rounded-lg"
+            placeholder="Worst 개수"
+            min="0"
+          />
         </div>
 
-
-        <!-- 슬랙 발송 옵션 -->
-        <div id="sendOption" class="tab-content">
-            <label class="block text-sm font-medium text-gray-600">발송 시간</label>
-            <div class="flex gap-2 mt-1">
-                <select id="send-hour" class="w-1/2 p-2 border rounded-lg">
-                    <script> for (let i = 0; i < 24; i++) document.write(`<option value="${i}">${i}시</option>`); </script>
-                </select>
-                <select id="send-minute" class="w-1/2 p-2 border rounded-lg">
-                    <script> for (let i = 0; i < 60; i++) document.write(`<option value="${i}">${i}분</option>`); </script>
-                </select>
-            </div>
-
-            <label class="block text-sm font-medium text-gray-600 mt-4">발송 메시지 개수</label>
-            <div class="flex gap-2 mt-1">
-                <input type="number" id="best-message-count" class="w-1/2 p-2 border rounded-lg" placeholder="Best 개수" min="0">
-                <input type="number" id="worst-message-count" class="w-1/2 p-2 border rounded-lg" placeholder="Worst 개수" min="0">
-            </div>
-
-            <div class="flex justify-end gap-2 mt-6">
-                <button id="sendOption-cancel-btn" class="px-4 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300">취소</button>
-                <button id="sendOption-save-btn" class="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600">저장</button>
-            </div>
+        <div class="flex justify-end gap-2 mt-6">
+          <button
+            id="sendOption-cancel-btn"
+            class="px-4 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300"
+          >
+            취소
+          </button>
+          <button
+            id="sendOption-save-btn"
+            class="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+          >
+            저장
+          </button>
         </div>
+      </div>
 
-        <!-- 대상 추가 -->
-        <div id="character" class="tab-content hidden">
-            <label class="block text-sm font-medium text-gray-600">이름</label>
-            <input type="text" id="character-name" class="w-full p-2 border rounded-lg mt-1" placeholder="띄어쓰기 없이 입력해 주세요.">
+      <!-- 대상 추가 -->
+      <div id="character" class="tab-content hidden">
+        <label class="block text-sm font-medium text-gray-600">이름</label>
+        <input
+          type="text"
+          id="character-name"
+          class="w-full p-2 border rounded-lg mt-1"
+          placeholder="띄어쓰기 없이 입력해 주세요."
+        />
 
-            <label class="block text-sm font-medium text-gray-600 mt-4">이미지 업로드</label>
-            <input type="file" id="character-image" class="w-full p-2 border rounded-lg mt-1">
+        <label class="block text-sm font-medium text-gray-600 mt-4"
+          >이미지 업로드</label
+        >
+        <input
+          type="file"
+          id="character-image"
+          class="w-full p-2 border rounded-lg mt-1"
+        />
 
-            <div class="flex justify-end mt-6">
-                <button id="character-save-btn" class="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600">저장</button>
-            </div>
+        <div class="flex justify-end mt-6">
+          <button
+            id="character-save-btn"
+            class="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+          >
+            저장
+          </button>
         </div>
-
+      </div>
     </div>
 
     <script>
-        $(document).ready(function () {
-            // 초기 탭 설정 (슬랙 발송 옵션이 기본 선택됨)
-            $(".tab-content").addClass("hidden");
-            $("#sendNow").removeClass("hidden"); // 기본 활성화
-            $(".tab-btn").removeClass("border-blue-500 text-blue-500");
-            $(".tab-btn[data-tab='sendNow']").addClass("border-blue-500 text-blue-500");
+      $(document).ready(function () {
+        // 초기 탭 설정 (슬랙 발송 옵션이 기본 선택됨)
+        $(".tab-content").addClass("hidden");
+        $("#sendNow").removeClass("hidden"); // 기본 활성화
+        $(".tab-btn").removeClass("border-blue-500 text-blue-500");
+        $(".tab-btn[data-tab='sendNow']").addClass(
+          "border-blue-500 text-blue-500"
+        );
 
-            // 탭 변경 이벤트
-            $(".tab-btn").click(function () {
-                let targetTab = $(this).data("tab");
+        // 탭 변경 이벤트
+        $(".tab-btn").click(function () {
+          let targetTab = $(this).data("tab");
 
-                // 모든 콘텐츠 숨기기
-                $(".tab-content").addClass("hidden");
-                $("#" + targetTab).removeClass("hidden");
+          // 모든 콘텐츠 숨기기
+          $(".tab-content").addClass("hidden");
+          $("#" + targetTab).removeClass("hidden");
 
-                // 탭 스타일 변경
-                $(".tab-btn").removeClass("border-blue-500 text-blue-500");
-                $(this).addClass("border-blue-500 text-blue-500");
-            });
-
-            // 슬랙 즉시 발송 버튼
-            $("#sendNow-btn").click(function () {
-                if (!confirm("정말로 즉시 발송하시겠습니까?")) {
-                    return;
-                }
-                $.ajax({
-                    type: "POST",
-                    url: "/slack/send",  // Flask에서 처리할 엔드포인트
-                    contentType: "application/json",
-                    success: function (response) {
-                        alert(response.message);
-                    },
-                    error: function () {
-                        alert("즉시 발송에 실패했습니다.");
-                    }
-                });
-
-                let message = $("#instant-message").val().trim();
-                alert(`즉시 발송됨:\n메시지: ${message}`);
-            });
-
-            // 슬랙 발송 옵션 취소 버튼
-            $("#sendOption-cancel-btn").click(function () {
-                $("#send-hour").val(0);
-                $("#send-minute").val(0);
-                $("#best-message-count").val("");
-                $("#worst-message-count").val("");
-            });
-
-            // 슬랙 발송 옵션 저장 버튼
-            $("#sendOption-save-btn").click(function () {
-                let settings = {
-                    hour: $("#send-hour").val(),
-                    minute: $("#send-minute").val(),
-                    best_count: $("#best-message-count").val(),
-                    worst_count: $("#worst-message-count").val()
-                };
-                $.ajax({
-                    type: "POST",
-                    url: "/slack/time",
-                    contentType: "application/json",
-                    data: JSON.stringify({ hour: hour, minute: minute }),
-                    success: function (response) {
-                        alert(response.message);
-                    },
-                    error: function () {
-                        alert("슬랙 메시지 전송 시간 설정에 실패했습니다.");
-                    }
-                });
-                alert(`설정 저장됨:\n발송 시간: ${settings.hour}시 ${settings.minute}분\nBest 메시지: ${settings.best_count}개\nWorst 메시지: ${settings.worst_count}개`);
-            });
-
-            // 대상 추가 저장 버튼
-            $("#character-save-btn").click(function () {
-                let name = $("#character-name").val();
-                let image = $("#character-image")[0].files[0];
-                if (!name || !image) {
-                    alert("이름과 이미지를 입력해주세요.");
-                    return;
-                }
-                alert(`대상 추가됨:\n이름: ${name}\n이미지: ${image.name}`);
-            });
+          // 탭 스타일 변경
+          $(".tab-btn").removeClass("border-blue-500 text-blue-500");
+          $(this).addClass("border-blue-500 text-blue-500");
         });
-    </script>
 
-</body>
+        // 슬랙 즉시 발송 버튼
+        $("#sendNow-btn").click(function () {
+          if (!confirm("정말로 즉시 발송하시겠습니까?")) {
+            return;
+          }
+          $.ajax({
+            type: "POST",
+            url: "/slack/send", // Flask에서 처리할 엔드포인트
+            contentType: "application/json",
+            success: function (response) {
+              alert(response.message);
+            },
+            error: function () {
+              alert("즉시 발송에 실패했습니다.");
+            },
+          });
+
+          let message = $("#instant-message").val().trim();
+          alert(`즉시 발송됨:\n메시지: ${message}`);
+        });
+
+        // 슬랙 발송 옵션 취소 버튼
+        $("#sendOption-cancel-btn").click(function () {
+          $("#send-hour").val(0);
+          $("#send-minute").val(0);
+          $("#best-message-count").val("");
+          $("#worst-message-count").val("");
+        });
+
+        // 슬랙 발송 옵션 저장 버튼
+        $("#sendOption-save-btn").click(function () {
+          let settings = {
+            hour: $("#send-hour").val(),
+            minute: $("#send-minute").val(),
+            best_limit: $("#best-message-count").val(),
+            worst_limit: $("#worst-message-count").val(),
+          };
+          $.ajax({
+            type: "POST",
+            url: "/slack/time",
+            data: { hour: settings.hour, minute: settings.minute },
+            success: function (response) {
+              alert(response.message);
+            },
+            error: function () {
+              alert("슬랙 메시지 전송 시간 설정에 실패했습니다.");
+            },
+          });
+          $.ajax({
+            type: "POST",
+            url: "/slack/limit",
+            data: {
+              best_limit: settings.best_limit,
+              worst_limit: settings.worst_limit,
+            },
+            success: function (response) {
+              alert(response.message);
+            },
+            error: function () {
+              alert("슬랙 메시지 갯수 제한 설정에 실패했습니다.");
+            },
+          });
+          alert(
+            `설정 저장됨:\n발송 시간: ${settings.hour}시 ${settings.minute}분\nBest 메시지: ${settings.best_limit}개\nWorst 메시지: ${settings.worst_limit}개`
+          );
+        });
+
+        // 대상 추가 저장 버튼
+        $("#character-save-btn").click(function () {
+          let name = $("#character-name").val();
+          let image = $("#character-image")[0].files[0];
+          if (!name || !image) {
+            alert("이름과 이미지를 입력해주세요.");
+            return;
+          }
+          alert(`대상 추가됨:\n이름: ${name}\n이미지: ${image.name}`);
+        });
+      });
+    </script>
+  </body>
 </html>

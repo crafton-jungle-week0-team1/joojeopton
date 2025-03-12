@@ -75,6 +75,9 @@ def home():
     if user_id is not None:
         user = get_user_by_user_id(user_id)
 
+    if user_id in ADMIN_LIST:
+        user["is_admin"] = True
+
     order = request.args.get('order', 'newest')  # 기본값 newest
     filter_option = request.args.get('filter', 'all')  # 기본값 all
     sorted_joojeops = get_joojeops(order, filter_option=filter_option)
@@ -87,6 +90,8 @@ def joojeop(coach_name):
     if user_id is None:
         return redirect(url_for("login"))
     user = get_user_by_user_id(user_id)
+    if user_id in ADMIN_LIST:
+        user["is_admin"] = True
     # 클라이언트에서 선택한 코치 이름 path variable로 받아오기
     # 코치 딕셔너리 생성
     coach = {"name": coach_name, "path": f"images/{coach_name}.png"}
@@ -296,6 +301,7 @@ def admin():
 # 슬랙 메세지 전송 시간 설정
 @app.route("/slack/time", methods=["POST"])
 def slack_time():
+    print("slack_time 함수 호출")
     user_id = decode_jwt_from_cookie()
     if user_id not in ADMIN_LIST:
         return jsonify({"success": False, "message": "관리자만 접근 가능합니다."}), 403
@@ -314,10 +320,10 @@ def slack_time():
         return jsonify({"success": True, "message": f"전송 시간이 {hour}시 {minute}분으로 설정되었습니다."}), 200
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400
-    
+
 
 # 슬랙 메세지 리미트 설정
-@app.route("/slack/limit", methods=["POST"])  
+@app.route("/slack/limit", methods=["POST"])
 def slack_limit():
     user_id = decode_jwt_from_cookie()
     if user_id not in ADMIN_LIST:
@@ -329,7 +335,7 @@ def slack_limit():
 
 
 # 슬랙 메세지 즉시 전송
-@app.route("/slack/send", methods=["POST"])  
+@app.route("/slack/send", methods=["POST"])
 def slack_send():
     user_id = decode_jwt_from_cookie()
     if user_id not in ADMIN_LIST:
