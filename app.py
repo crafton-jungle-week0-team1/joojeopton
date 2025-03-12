@@ -79,8 +79,8 @@ def home():
         return redirect(url_for("login"))
 
 
-@app.route('/joojeop/<coach_name>/<sort_order>', methods=['GET'])
-def joojeop(coach_name, sort_order):
+@app.route('/joojeop/<coach_name>', methods=['GET'])
+def joojeop(coach_name):
     user_id = decode_jwt_from_cookie()
     if user_id is None:
         return redirect(url_for("login"))
@@ -230,21 +230,23 @@ def logout():
     return response
 
 
-@app.route("/joojeop/<coach_name>/<sort_order>/<keyword>/generate/gemini", methods=["POST"])
-def generate_joojeop_gemini(coach_name, sort_order, keyword):
+@app.route("/joojeop/<coach_name>/<keyword>/generate/gemini", methods=["POST"])
+def generate_joojeop_gemini(coach_name, keyword):
     print("generate_joojeop 함수 호출")
     user_id = decode_jwt_from_cookie()
     content = gemini.get_gemini_response(
         f"{coach_name}에 대한 주접 하나 만들어줘. 트위터 말투. 키워드:{keyword}")
     print(content)
+    sort_order = request.args.get('sort_order', 'newest')
 
     return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order, content=content))
 
 
-@app.route("/joojeop/<coach_name>/<sort_order>/<keyword>/generate/gpt", methods=["POST"])
-def generate_joojeop_gpt(coach_name, sort_order, keyword):
+@app.route("/joojeop/<coach_name>/<keyword>/generate/gpt", methods=["POST"])
+def generate_joojeop_gpt(coach_name, keyword):
     print("generate_joojeop 함수 호출")
     user_id = decode_jwt_from_cookie()
+    sort_order = request.args.get('sort_order', 'newest')
     content = gpt.get_gpt_response(
         f"{coach_name}에 대한 주접 하나 만들어줘. 아재개그 스타일 20글자 이내로. 키워드:{keyword}")
     print(content)

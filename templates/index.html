@@ -112,7 +112,7 @@
                 <img src="{{ url_for('static', filename=coach.path) }}" alt="image" class="mb-4"
                     style="width: 100px; height: 125px; object-fit: cover;">
                 <button class="bg-white border border-blue-300 text-blue-400 hover:bg-blue-50 p-2 block mx-auto"
-                    id="btn-{{coach.name}}" onclick="location.href='joojeop/{{ coach.name }}/newest'"> {{ coach.name }}
+                    id="btn-{{coach.name}}" onclick="location.href='joojeop/{{ coach.name }}'"> {{ coach.name }}
                     주접떨기</button>
             </div>
             {% endfor %}

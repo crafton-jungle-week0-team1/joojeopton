@@ -52,7 +52,7 @@
                     //e.preventDefault(); // 폼 전송 중단
                     return false;
                 }
-                this.action = `/joojeop/${coachName}/${sortOrder}/${encodeURIComponent(
+                this.action = `/joojeop/${coachName}/${encodeURIComponent(
                     selectedKeyword
                 )}/generate/gemini`;
             });
@@ -62,7 +62,7 @@
                     //e.preventDefault(); // 폼 전송 중단
                     return false;
                 }
-                this.action = `/joojeop/${coachName}/${sortOrder}/${encodeURIComponent(selectedKeyword)}/generate/gpt`;
+                this.action = `/joojeop/${coachName}/${encodeURIComponent(selectedKeyword)}/generate/gpt`;
             });
 
             $(".save-btn").on("click", function (e) {
@@ -196,7 +196,9 @@
             </div>
 
             <div class="col-span-2 mt-4 space-y-4">
-                <div class="result border p-5">{{ content }}</div>
+                <div class="result border p-5">
+                    <textarea name="" id="" class="result"> {{ content }} </textarea>
+                </div>
 
                 <button
                     class="save-btn bg-white border border-blue-300 text-blue-400 hover:bg-blue-50 p-3 block mx-auto">
