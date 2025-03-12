@@ -66,8 +66,8 @@ def home():
     ]
     if user:
         order = request.args.get('order', 'newest')  # 기본값 newest
-        print(order)
-        sorted_joojeops = get_joojeops(order)
+        filter_option = request.args.get('filter', 'all')  # 기본값 all
+        sorted_joojeops = get_joojeops(order, filter_option=filter_option)
         return render_template("index.html", user=user, coaches=coaches, joojeops=sorted_joojeops)
     else:
         return redirect(url_for("login"))
@@ -88,8 +88,9 @@ def joojeop(coach_name, sort_order):
     # 코치 딕셔너리 생성
     coach = {"name": coach_name, "path": f"images/{coach_name}.png"}
     # 해당 코치의 주접 리스트만 표현하도록 업데이트
-    joojeops = get_joojeops_by_coach_name(coach_name, sort_order)
-    print(joojeops)
+    filter_option = request.args.get('filter', 'all')  # 기본값 all
+    joojeops = get_joojeops_by_coach_name(coach_name, sort_order, filter_option=filter_option)
+    
     # get content from query string if exists
     content = request.args.get('content', '')
 
@@ -313,7 +314,7 @@ def like_joojeop(joojeop_id, user_id):
     return True
 
 
-def get_joojeops_by_coach_name(coach_name, order='newest', limit=None):
+def get_joojeops_by_coach_name(coach_name, order='newest', limit=None, filter_option='all'):
     """
     주어진 coach_name의 모든 주접을 가져와서 정렬하여 반환하는 함수
     """
@@ -337,6 +338,12 @@ def get_joojeops_by_coach_name(coach_name, order='newest', limit=None):
             joojeops, key=lambda x: x['date'], reverse=False)
     else:
         sorted_joojeops = joojeops
+    
+    # 필터링    
+    if filter_option == 'all':  
+        pass
+    elif filter_option == 'mine':
+        sorted_joojeops = [joojeop for joojeop in sorted_joojeops if joojeop['author_id'] == decode_jwt_from_cookie()]
 
     if limit:
         sorted_joojeops = sorted_joojeops[:limit]
@@ -378,7 +385,7 @@ def get_joojeops_by_author_id(author_id, order='newest', limit=None):
     return sorted_joojeops
 
 
-def get_joojeops(order='newest', limit=None):
+def get_joojeops(order='newest', limit=None, filter_option='all'):
     """
     모든 주접을 가져와서 정렬하여 반환하는 함수
     :param order: 정렬 기준 ('newest', 'like' 또는 'oldest')
@@ -399,6 +406,12 @@ def get_joojeops(order='newest', limit=None):
     else:
         sorted_joojeops = joojeops
 
+    # 필터링    
+    if filter_option == 'all':  
+        pass
+    elif filter_option == 'mine':
+        sorted_joojeops = [joojeop for joojeop in sorted_joojeops if joojeop['author_id'] == decode_jwt_from_cookie()]
+    
     if limit:
         sorted_joojeops = sorted_joojeops[:limit]
 

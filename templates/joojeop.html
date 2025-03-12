@@ -23,6 +23,16 @@
         }
     </style>
     <script>
+        // 기존 URL에 query string 파라미터를 추가하거나 업데이트하는 함수
+        function updateQueryStringParameter(uri, key, value) {
+            var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+            var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+            if (uri.match(re)) {
+                return uri.replace(re, '$1' + key + "=" + value + '$2');
+            } else {
+                return uri + separator + key + "=" + value;
+            }
+        }
         $(document).ready(function () {
             console.log("ready!");
             let selectedKeyword = '';
@@ -73,6 +83,17 @@
                     location.reload();
                 });
             });
+            // "모든주접" 버튼 클릭 시: 쿼리 파라미터 filter=all 추가
+            $('.all-joojeop-btn').on('click', function () {
+                var newUrl = updateQueryStringParameter(window.location.href, 'filter', 'all');
+                window.location.href = newUrl;
+            });
+
+            // "내주접" 버튼 클릭 시: 쿼리 파라미터 filter=mine 추가
+            $('.my-joojeop-btn').on('click', function () {
+                var newUrl = updateQueryStringParameter(window.location.href, 'filter', 'mine');
+                window.location.href = newUrl;
+            });
         });
 
     </script>
@@ -83,7 +104,9 @@
     <div>
         <div class="flex items-center justify-between w-full p-4 border-b">
             <div class="flex flex-col">
-                <a href="/"><h1 class="text-3xl font-bold text-gray-500">정글 주접톤</h1></a>
+                <a href="/">
+                    <h1 class="text-3xl font-bold text-gray-500">정글 주접톤</h1>
+                </a>
                 <p class="text-sm text-gray-400">crafton jungle</p>
             </div>
             <div class="flex items-center space-x-4">
@@ -134,9 +157,9 @@
         </div>
         <div class="container p-5">
             <button
-                class="m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">모든주접</button>
+                class="all-joojeop-btn px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">모든주접</button>
             <button
-                class="m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">내주접</button>
+                class="my-joojeop-btn px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">내주접</button>
 
             <div class="relative inline-block text-left m-1">
 
@@ -168,7 +191,7 @@
                 </div>
             </div>
 
-            
+
             <!-- 주접문 블록 예시 -->
             {% for joojeop in joojeops %}
             <div class="joojeop-block border m-5 p-5">
@@ -191,7 +214,7 @@
                     {% if joojeop.isAuthor %}
                     <input type="hidden" name="joojeop_id" value="{{ joojeop._id }}">
                     <button
-                        class="delete-btn bg-white border border-red-300 text-red-400 hover:bg-red-50 p-2 block mx-auto"> 
+                        class="delete-btn bg-white border border-red-300 text-red-400 hover:bg-red-50 p-2 block mx-auto">
                         삭제
                         <input type="hidden" name="joojeop_id" value="{{ joojeop._id }}">
                     </button>
