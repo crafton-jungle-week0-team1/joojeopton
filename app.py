@@ -31,6 +31,9 @@ GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET")
 BEST_LIMIT = 5
 WORST_LIMIT = 5
 
+ADMIN_LIST = [os.getenv("ADMIN_GOOCHUL"), os.getenv(
+    "ADMIN_HYUNHO"), os.getenv("ADMIN_JINYOUNG")]
+
 # 구글 소셜 로그인
 google_bp = make_google_blueprint(
     client_id=GOOGLE_CLIENT_ID,
@@ -65,7 +68,7 @@ coaches = [
 # 각 코치진을 클릭하면 그 코치의 주접을 볼 수 있는 페이지로 넘어간다.
 
 
-@app.route('/', methods=['GET'])
+@app.route('/', methods=['GET'])  # 인덱스 페이지
 def home():
     user_id = decode_jwt_from_cookie()
     user = None
@@ -78,7 +81,7 @@ def home():
     return render_template("index.html", user=user, coaches=coaches, joojeops=sorted_joojeops)
 
 
-@app.route('/joojeop/<coach_name>/<sort_order>', methods=['GET'])
+@app.route('/joojeop/<coach_name>/<sort_order>', methods=['GET'])  # 주접 불러오기
 def joojeop(coach_name, sort_order):
     user_id = decode_jwt_from_cookie()
     if user_id is None:
@@ -98,7 +101,7 @@ def joojeop(coach_name, sort_order):
     return render_template("joojeop.html", coach=coach, joojeops=joojeops, sort_order=sort_order, content=content, user=user)
 
 
-@app.route('/joojeop/<joojeop_id>/like', methods=['POST'])
+@app.route('/joojeop/<joojeop_id>/like', methods=['POST'])  # 좋아요 기능
 def like(joojeop_id):
     # 클라이언트에서 선택한 주접의 id를 받아오기
     # 해당 주접의 like 수를 1 증가시키기
@@ -107,7 +110,7 @@ def like(joojeop_id):
     return redirect(url_for("home"))
 
 
-@app.route('/joojeop/<joojeop_id>/dislike', methods=['POST'])
+@app.route('/joojeop/<joojeop_id>/dislike', methods=['POST'])  # 싫어요 기능
 def dislike(joojeop_id):
     # 클라이언트에서 선택한 주접의 id를 받아오기
     # 해당 주접의 dislike 수를 1 증가시키기
@@ -116,7 +119,7 @@ def dislike(joojeop_id):
     return redirect(url_for("home"))
 
 
-@app.route('/joojeop/<joojeop_id>/delete', methods=['POST'])
+@app.route('/joojeop/<joojeop_id>/delete', methods=['POST'])  # 삭제 기능
 def delete_joojeop(joojeop_id):
     # 클라이언트에서 선택한 주접의 id를 받아오기
     # 해당 주접 삭제
@@ -237,6 +240,7 @@ def logout():
     return response
 
 
+# 주접 생성
 @app.route("/joojeop/<coach_name>/<sort_order>/<keyword>/generate/gemini", methods=["POST"])
 def generate_joojeop_gemini(coach_name, sort_order, keyword):
     print("generate_joojeop 함수 호출")
@@ -248,6 +252,7 @@ def generate_joojeop_gemini(coach_name, sort_order, keyword):
     return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order, content=content))
 
 
+# 주접 생성
 @app.route("/joojeop/<coach_name>/<sort_order>/<keyword>/generate/gpt", methods=["POST"])
 def generate_joojeop_gpt(coach_name, sort_order, keyword):
     print("generate_joojeop 함수 호출")
@@ -259,6 +264,7 @@ def generate_joojeop_gpt(coach_name, sort_order, keyword):
     return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order, content=content))
 
 
+# 주접 저장
 @app.route("/joojeop/<coach_name>/<sort_order>/save", methods=["POST"])
 def save_joojeop_route(coach_name, sort_order):
     user_id = decode_jwt_from_cookie()
@@ -267,12 +273,20 @@ def save_joojeop_route(coach_name, sort_order):
     save_joojeop(user_id, user["name"], coach_name, content)
     return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order))
 
-# TODO: 관리자 페이지 라우팅
+
+@app.route("/admin")
+def admin():
+    user_id = decode_jwt_from_cookie()
+    if user_id not in ADMIN_LIST:
+        return redirect(url_for("home"))
+    return render_template("admin.html")
 
 
 @app.route("/slack/time", methods=["POST"])  # 슬랙 메세지 전송 시간 설정
 def slack_time():
-    print("slack_time 함수 호출")
+    user_id = decode_jwt_from_cookie()
+    if user_id not in ADMIN_LIST:
+        return jsonify({"success": False, "message": "관리자만 접근 가능합니다."}), 403
     hour = int(request.form.get("hour"))
     minute = int(request.form.get("minute"))
 
@@ -291,10 +305,22 @@ def slack_time():
 
 @app.route("/slack/limit", methods=["POST"])  # 슬랙 메세지 리미트 설정
 def slack_limit():
+    user_id = decode_jwt_from_cookie()
+    if user_id not in ADMIN_LIST:
+        return jsonify({"success": False, "message": "관리자만 접근 가능합니다."}), 403
     global BEST_LIMIT, WORST_LIMIT
     BEST_LIMIT = int(request.form.get("best_limit"))
     WORST_LIMIT = int(request.form.get("worst_limit"))
     return jsonify({"success": True, "message": "Updated limit"}), 200
+
+
+@app.route("/slack/send", methods=["POST"])  # 슬랙 메세지 수동 전송
+def slack_send():
+    user_id = decode_jwt_from_cookie()
+    if user_id not in ADMIN_LIST:
+        return jsonify({"success": False, "message": "관리자만 접근 가능합니다."}), 403
+    scheduled_job()
+    return jsonify({"success": True, "message": "Sent slack message"}), 200
 
 
 def get_user_and_authorization_by_jwt():
