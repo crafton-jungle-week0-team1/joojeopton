@@ -46,13 +46,21 @@
             });
             let coachName = "{{ coach.name }}";
             let sortOrder = "{{ sort_order }}";
-            $('form').on('submit', function (e) {
+            $('.generate-btn.gemini').on('submit', function (e) {
                 if (!selectedKeyword) {
                     alert("키워드를 하나 이상 선택해주세요!");
                     //e.preventDefault(); // 폼 전송 중단
                     return false;
                 }
-                this.action = `/joojeop/${coachName}/${sortOrder}/${encodeURIComponent(selectedKeyword)}/generate`;
+                this.action = `/joojeop/${coachName}/${sortOrder}/${encodeURIComponent(selectedKeyword)}/generate/gemini`;
+            });
+            $('.generate-btn.gpt').on('submit', function (e) {
+                if (!selectedKeyword) {
+                    alert("키워드를 하나 이상 선택해주세요!");
+                    //e.preventDefault(); // 폼 전송 중단
+                    return false;
+                }
+                this.action = `/joojeop/${coachName}/${sortOrder}/${encodeURIComponent(selectedKeyword)}/generate/gpt`;
             });
 
             $('.save-btn').on('click', function (e) {
@@ -136,27 +144,51 @@
                         class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#멋짐</button>
                     <button
                         class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#사랑스러움</button>
-                    <button class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#코딩실력</button>
-                    <button class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#패션</button>
-                    <button class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#존재자체</button>
-                    <button class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#외모</button>
-                    <button class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#그냥좋아</button>
-                    <button class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#덕질</button>
-                    <button class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#목소리</button>
-                    <button class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#어메이징</button>
-                    <button class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#펀치라인</button>
-                    <button class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#악세사리</button>
-                    <button class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#헤어스타일</button>
-                    <button class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#매력</button>
-                    <button class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#경력</button>
-                    <button class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#센스</button>
-                    <button class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#발사이즈</button>
-                    <button class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#고져스</button>
+                    <button
+                        class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#코딩실력</button>
+                    <button
+                        class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#패션</button>
+                    <button
+                        class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#존재자체</button>
+                    <button
+                        class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#외모</button>
+                    <button
+                        class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#그냥좋아</button>
+                    <button
+                        class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#덕질</button>
+                    <button
+                        class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#목소리</button>
+                    <button
+                        class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#어메이징</button>
+                    <button
+                        class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#펀치라인</button>
+                    <button
+                        class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#악세사리</button>
+                    <button
+                        class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#헤어스타일</button>
+                    <button
+                        class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#매력</button>
+                    <button
+                        class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#경력</button>
+                    <button
+                        class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#센스</button>
+                    <button
+                        class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#발사이즈</button>
+                    <button
+                        class="keyword-btn m-1 px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">#고져스</button>
                 </div>
-                <form action="" method="post" style="margin: 0; padding: 0;">
-                    <button type="submit"
-                        class="bg-white border border-blue-300 text-blue-400 hover:bg-blue-50 p-3 block mx-auto">주접떨기</button>
-                </form>
+                <div class="flex items-center justify-center space-x-4 mt-4 mb-4">
+                    <form class="generate-btn gemini" action="" method="post" style="margin: 0; padding: 0;">
+                        <button type="submit"
+                            class="bg-white border border-blue-300 text-blue-400 hover:bg-blue-50 p-3 block mx-auto">제미니로
+                            주접떨기</button>
+                    </form>
+                    <form class="generate-btn gpt" method="post" style="margin: 0; padding: 0;">
+                        <button type="submit"
+                            class="bg-white border border-blue-300 text-blue-400 hover:bg-blue-50 p-3 block mx-auto">GPT로
+                            주접떨기</button>
+                    </form>
+                </div>
             </div>
 
             <div class="col-span-2 mt-4 space-y-4">
