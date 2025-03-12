@@ -20,7 +20,7 @@ scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()
 
-os.environ["OAUTHLIB_INSECURE_TRANjSPORT"] = "1"  # HTTP에서도 사용 가능하도록 설정
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # HTTP에서도 사용 가능하도록 설정
 app.secret_key = os.urandom(24)
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
@@ -234,6 +234,7 @@ def generate_joojeop_gemini(coach_name, sort_order, keyword):
 
     return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order, content=content))
 
+
 @app.route("/joojeop/<coach_name>/<sort_order>/<keyword>/generate/gpt", methods=["POST"])
 def generate_joojeop_gpt(coach_name, sort_order, keyword):
     print("generate_joojeop 함수 호출")
@@ -243,6 +244,7 @@ def generate_joojeop_gpt(coach_name, sort_order, keyword):
     print(content)
 
     return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order, content=content))
+
 
 @app.route("/joojeop/<coach_name>/<sort_order>/save", methods=["POST"])
 def save_joojeop_route(coach_name, sort_order):
