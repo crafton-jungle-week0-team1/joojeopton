@@ -66,16 +66,12 @@ def home():
     ]
     if user:
         order = request.args.get('order', 'newest')  # 기본값 newest
+        print(order)
         filter_option = request.args.get('filter', 'all')  # 기본값 all
         sorted_joojeops = get_joojeops(order, filter_option=filter_option)
         return render_template("index.html", user=user, coaches=coaches, joojeops=sorted_joojeops)
     else:
         return redirect(url_for("login"))
-
-
-@app.route("/login")
-def login():
-    return render_template("login.html")
 
 
 @app.route('/joojeop/<coach_name>/<sort_order>', methods=['GET'])
