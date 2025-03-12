@@ -100,9 +100,10 @@ def joojeop(coach_name, sort_order):
 def like(joojeop_id):
     # 클라이언트에서 선택한 주접의 id를 받아오기
     # 해당 주접의 like 수를 1 증가시키기
-    print('like joojeop 호출')
-    like_joojeop(ObjectId(joojeop_id))
+    user_id = decode_jwt_from_cookie()
+    like_joojeop(int(joojeop_id), user_id)
     return redirect(url_for("home"))
+
 
 @app.route("/google")  # ✅ Google 로그인 처리
 def google_login():
@@ -283,20 +284,27 @@ def save_joojeop(author_id, author_name, coach_name, content):
         "author_id": author_id,
         "date": datetime.datetime.now().strftime("%Y-%m-%d"),
         "like": 0,
-        "coach_name": coach_name
+        "coach_name": coach_name,
+        "liked_by": []
     }
     db.joojeops.insert_one(joojeop)
 
 
-def like_joojeop(joojeop_id):
+def like_joojeop(joojeop_id, user_id):
     """
     주접에 좋아요를 누르는 함수
     """
     object_id = ObjectId(joojeop_id)
     joojeop = db.joojeops.find_one({"_id": object_id})
+    if user_id in joojeop["liked_by"]:
+        db.joojeops.update_one({"_id": object_id}, {"$inc": {"like": -1}})
+        db.joojeops.update_one({"_id": object_id}, {
+                               "$pull": {"liked_by": user_id}})
     if joojeop:
         db.joojeops.update_one({"_id": object_id}, {"$inc": {"like": 1}})
-        return True
+        db.joojeops.update_one({"_id": object_id}, {
+                               "$push": {"liked_by": user_id}})
+    return True
 
 
 def get_joojeops_by_coach_name(coach_name, order='newest', limit=None):
