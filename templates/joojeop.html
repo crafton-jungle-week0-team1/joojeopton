@@ -33,6 +33,12 @@
                 return uri + separator + key + "=" + value;
             }
         }
+        function empty_content(coachName, sortOrder) {
+            $.post(`/joojeop/${encodeURIComponent(coachName)}`, {}, function (data) {
+                alert("주접이 저장되었습니다!");
+                location.reload();
+            });
+        }
         $(document).ready(function () {
             console.log("ready!");
             let selectedKeyword = "";
@@ -46,7 +52,11 @@
             });
             let coachName = "{{ coach.name }}";
             let sortOrder = "{{ sort_order }}";
+
             $('.generate-btn.gemini').on('submit', function (e) {
+                const urlParams = new URLSearchParams(window.location.search);
+                let currentSortOrder = urlParams.get('sort_order') || sortOrder;
+                sortOrder = currentSortOrder; // Update the sortOrder variable
                 if (!selectedKeyword) {
                     alert("키워드를 하나 이상 선택해주세요!");
                     //e.preventDefault(); // 폼 전송 중단
@@ -54,27 +64,43 @@
                 }
                 this.action = `/joojeop/${coachName}/${encodeURIComponent(
                     selectedKeyword
-                )}/generate/gemini`;
+                )}/generate/gemini?sort_order=${sortOrder}`;
             });
+            
             $('.generate-btn.gpt').on('submit', function (e) {
+                const urlParams = new URLSearchParams(window.location.search);
+                let currentSortOrder = urlParams.get('sort_order') || sortOrder;
+                sortOrder = currentSortOrder; // Update the sortOrder variable
                 if (!selectedKeyword) {
                     alert("키워드를 하나 이상 선택해주세요!");
                     //e.preventDefault(); // 폼 전송 중단
                     return false;
                 }
-                this.action = `/joojeop/${coachName}/${encodeURIComponent(selectedKeyword)}/generate/gpt`;
+                this.action = `/joojeop/${coachName}/${encodeURIComponent(selectedKeyword)}/generate/gpt?sort_order=${sortOrder}`;
             });
 
             $(".save-btn").on("click", function (e) {
                 e.preventDefault();
-                let content = $(".result").text();
+                let content = $("#content-text-area").val();
+                alert(content);
+                
+                if (content.trim() === "") {
+                    alert("주접을 입력해주세요!");
+                    return false;
+                }
+
+                // Get sort_order from current URL
+                const urlParams = new URLSearchParams(window.location.search);
+                let currentSortOrder = urlParams.get('sort_order') || sortOrder;
+                sortOrder = currentSortOrder; // Update the sortOrder variable
+                
                 $.post(
                     `/joojeop/${encodeURIComponent(coachName)}/${sortOrder}/save`,
                     {
                         content: content,
                     },
                     function (data) {
-                        location.reload();
+                        window.location.href = `/joojeop/${encodeURIComponent(coachName)}?sort_order=${sortOrder}`;
                     }
                 );
             });
@@ -130,11 +156,16 @@
                 var newUrl = updateQueryStringParameter(window.location.href, 'sort_order', 'like');
                 window.location.href = newUrl;
             });
+            $('.sort-btn.dislike').on('click', function () {
+                var newUrl = updateQueryStringParameter(window.location.href, 'sort_order', 'dislike');
+                window.location.href = newUrl;
+            });
             $('.sort-btn.oldest').on('click', function () {
                 var newUrl = updateQueryStringParameter(window.location.href, 'sort_order', 'oldest');
                 window.location.href = newUrl;
             });
         });
+        
     </script>
 </head>
 
@@ -196,8 +227,8 @@
             </div>
 
             <div class="col-span-2 mt-4 space-y-4">
-                <div class="result border p-5">
-                    <textarea name="" id="" class="result"> {{ content }} </textarea>
+                <div class="result border p-5 min-h-48">
+                    <textarea name="" id="content-text-area" class="result child w-full min-h-48 resize-none border-none focus:outline-none">{{ content }}</textarea>
                 </div>
 
                 <button
@@ -234,8 +265,9 @@
                     <div id="dropdownMenu"
                         class="absolute mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg hidden">
                         <a class="sort-btn newest block px-4 py-2 text-gray-700 hover:bg-gray-100">최신순</a>
-                        <a class="sort-btn like block px-4 py-2 text-gray-700 hover:bg-gray-100">좋아요순</a>
                         <a class="sort-btn oldest block px-4 py-2 text-gray-700 hover:bg-gray-100">오래된순</a>
+                        <a class="sort-btn like block px-4 py-2 text-gray-700 hover:bg-gray-100">좋아요순</a>
+                        <a class="sort-btn dislike block px-4 py-2 text-gray-700 hover:bg-gray-100">싫어요순</a>
                     </div>
                 </div>
             </div>

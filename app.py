@@ -384,6 +384,9 @@ def get_joojeops_by_coach_name(coach_name, order='newest', limit=5, filter_optio
     elif order == 'like':
         sorted_joojeops = sorted(
             joojeops, key=lambda x: x['like'], reverse=True)
+    elif order == 'dislike':
+        sorted_joojeops = sorted(
+            joojeops, key=lambda x: x['dislike'], reverse=True)
     elif order == 'oldest':
         sorted_joojeops = sorted(
             joojeops, key=lambda x: x['date'], reverse=False)
@@ -425,6 +428,9 @@ def get_joojeops_by_author_id(author_id, order='newest', limit=5):
     elif order == 'like':
         sorted_joojeops = sorted(
             joojeops, key=lambda x: x['like'], reverse=True)
+    elif order == 'dislike':
+        sorted_joojeops = sorted(
+            joojeops, key=lambda x: x['dislike'], reverse=True)
     elif order == 'oldest':
         sorted_joojeops = sorted(
             joojeops, key=lambda x: x['date'], reverse=False)
@@ -456,6 +462,9 @@ def get_joojeops(order='newest', limit=5, filter_option='all'):
     elif order == 'like':
         sorted_joojeops = sorted(
             joojeops, key=lambda x: x['like'], reverse=True)
+    elif order == 'dislike':
+        sorted_joojeops = sorted(
+            joojeops, key=lambda x: x['dislike'], reverse=True)
     elif order == 'oldest':
         sorted_joojeops = sorted(
             joojeops, key=lambda x: x['date'], reverse=False)

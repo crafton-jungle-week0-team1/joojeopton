@@ -77,6 +77,10 @@
                 var newUrl = updateQueryStringParameter(window.location.href, 'sort_order', 'like');
                 window.location.href = newUrl;
             });
+            $('.sort-btn.dislike').on('click', function () {
+                var newUrl = updateQueryStringParameter(window.location.href, 'sort_order', 'dislike');
+                window.location.href = newUrl;
+            });
             $('.sort-btn.oldest').on('click', function () {
                 var newUrl = updateQueryStringParameter(window.location.href, 'sort_order', 'oldest');
                 window.location.href = newUrl;
@@ -142,6 +146,7 @@
                     <a class="sort-btn newest block px-4 py-2 text-gray-700 hover:bg-gray-100">최신순</a>
                     <a class="sort-btn oldest block px-4 py-2 text-gray-700 hover:bg-gray-100">오래된순</a>
                     <a class="sort-btn like block px-4 py-2 text-gray-700 hover:bg-gray-100">좋아요순</a>
+                    <a class="sort-btn dislike block px-4 py-2 text-gray-700 hover:bg-gray-100">싫어요순</a>
                 </div>
             </div>
 
