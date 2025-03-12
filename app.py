@@ -20,7 +20,7 @@ scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()
 
-os.environ["OAUTHLIB_INSECURE_TRANjSPORT"] = "1"  # HTTP에서도 사용 가능하도록 설정
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # HTTP에서도 사용 가능하도록 설정
 app.secret_key = os.urandom(24)
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
@@ -86,9 +86,9 @@ def joojeop(coach_name, sort_order):
     coach = {"name": coach_name, "path": f"images/{coach_name}.png"}
     # 해당 코치의 주접 리스트만 표현하도록 업데이트
     filter_option = request.args.get('filter', 'all')  # 기본값 all
-    joojeops = get_joojeops_by_coach_name(coach_name, sort_order, filter_option=filter_option)
-    
-    # get content from query string if exists
+    joojeops = get_joojeops_by_coach_name(
+        coach_name, sort_order, filter_option=filter_option)
+
     content = request.args.get('content', '')
 
     # 코치 데이터 템플릿에 넘겨주기
@@ -103,6 +103,16 @@ def like(joojeop_id):
     like_joojeop(joojeop_id, user_id)
     return redirect(url_for("home"))
 
+
+@app.route('/joojeop/<joojeop_id>/dislike', methods=['POST'])
+def dislike(joojeop_id):
+    # 클라이언트에서 선택한 주접의 id를 받아오기
+    # 해당 주접의 dislike 수를 1 증가시키기
+    user_id = decode_jwt_from_cookie()
+    dislike_joojeop(joojeop_id, user_id)
+    return redirect(url_for("home"))
+
+
 @app.route('/joojeop/<joojeop_id>/delete', methods=['POST'])
 def delete_joojeop(joojeop_id):
     # 클라이언트에서 선택한 주접의 id를 받아오기
@@ -110,6 +120,7 @@ def delete_joojeop(joojeop_id):
     object_id = ObjectId(joojeop_id)
     db.joojeops.delete_one({"_id": object_id})
     return redirect(url_for("home"))
+
 
 @app.route("/google")  # ✅ Google 로그인 처리
 def google_login():
@@ -150,9 +161,11 @@ def google_login():
 
     return "Google 로그인 실패", 403
 
+
 @app.route("/login")
 def login():
     return render_template("login.html")
+
 
 @app.route("/github")  # ✅ GitHub 로그인 처리
 def github_login():
@@ -221,6 +234,7 @@ def generate_joojeop_gemini(coach_name, sort_order, keyword):
 
     return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order, content=content))
 
+
 @app.route("/joojeop/<coach_name>/<sort_order>/<keyword>/generate/gpt", methods=["POST"])
 def generate_joojeop_gpt(coach_name, sort_order, keyword):
     print("generate_joojeop 함수 호출")
@@ -230,6 +244,7 @@ def generate_joojeop_gpt(coach_name, sort_order, keyword):
     print(content)
 
     return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order, content=content))
+
 
 @app.route("/joojeop/<coach_name>/<sort_order>/save", methods=["POST"])
 def save_joojeop_route(coach_name, sort_order):
@@ -301,7 +316,9 @@ def save_joojeop(author_id, author_name, coach_name, content):
         "date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "like": 0,
         "coach_name": coach_name,
-        "liked_by": []
+        "liked_by": [],
+        "dislike": 0,
+        "disliked_by": []
     }
     db.joojeops.insert_one(joojeop)
 
@@ -320,6 +337,23 @@ def like_joojeop(joojeop_id, user_id):
         db.joojeops.update_one({"_id": object_id}, {"$inc": {"like": 1}})
         db.joojeops.update_one({"_id": object_id}, {
                                "$push": {"liked_by": user_id}})
+    return True
+
+
+def dislike_joojeop(joojeop_id, user_id):
+    """
+    주접에 싫어요를 누르는 함수
+    """
+    object_id = ObjectId(joojeop_id)
+    joojeop = db.joojeops.find_one({"_id": object_id})
+    if user_id in joojeop["disliked_by"]:
+        db.joojeops.update_one({"_id": object_id}, {"$inc": {"dislike": -1}})
+        db.joojeops.update_one({"_id": object_id}, {
+                               "$pull": {"disliked_by": user_id}})
+    else:
+        db.joojeops.update_one({"_id": object_id}, {"$inc": {"dislike": 1}})
+        db.joojeops.update_one({"_id": object_id}, {
+                               "$push": {"disliked_by": user_id}})
     return True
 
 
@@ -347,12 +381,13 @@ def get_joojeops_by_coach_name(coach_name, order='newest', limit=None, filter_op
             joojeops, key=lambda x: x['date'], reverse=False)
     else:
         sorted_joojeops = joojeops
-    
-    # 필터링    
-    if filter_option == 'all':  
+
+    # 필터링
+    if filter_option == 'all':
         pass
     elif filter_option == 'mine':
-        sorted_joojeops = [joojeop for joojeop in sorted_joojeops if joojeop['author_id'] == decode_jwt_from_cookie()]
+        sorted_joojeops = [
+            joojeop for joojeop in sorted_joojeops if joojeop['author_id'] == decode_jwt_from_cookie()]
 
     if limit:
         sorted_joojeops = sorted_joojeops[:limit]
@@ -360,8 +395,12 @@ def get_joojeops_by_coach_name(coach_name, order='newest', limit=None, filter_op
     # _id를 string으로 변환
     for joojeop in sorted_joojeops:
         joojeop['_id'] = str(joojeop['_id'])
-        joojeop['isAuthor'] = False if joojeop['author_id'] != decode_jwt_from_cookie() else True
-        joojeop['isLiked'] = True if decode_jwt_from_cookie() in joojeop.get('liked_by', []) else False
+        joojeop['isAuthor'] = False if joojeop['author_id'] != decode_jwt_from_cookie(
+        ) else True
+        joojeop['isLiked'] = True if decode_jwt_from_cookie(
+        ) in joojeop.get('liked_by', []) else False
+        joojeop['isDisLiked'] = True if decode_jwt_from_cookie(
+        ) in joojeop.get('disliked_by', []) else False
 
     return sorted_joojeops
 
@@ -394,7 +433,7 @@ def get_joojeops_by_author_id(author_id, order='newest', limit=None):
     return sorted_joojeops
 
 
-def get_joojeops(order='newest', limit=None, filter_option='all'):
+def get_joojeops(order='newest', limit=5, filter_option='all'):
     """
     모든 주접을 가져와서 정렬하여 반환하는 함수
     :param order: 정렬 기준 ('newest', 'like' 또는 'oldest')
@@ -415,20 +454,23 @@ def get_joojeops(order='newest', limit=None, filter_option='all'):
     else:
         sorted_joojeops = joojeops
 
-    # 필터링    
-    if filter_option == 'all':  
+    # 필터링
+    if filter_option == 'all':
         pass
     elif filter_option == 'mine':
-        sorted_joojeops = [joojeop for joojeop in sorted_joojeops if joojeop['author_id'] == decode_jwt_from_cookie()]
-    
+        sorted_joojeops = [
+            joojeop for joojeop in sorted_joojeops if joojeop['author_id'] == decode_jwt_from_cookie()]
+
     if limit:
         sorted_joojeops = sorted_joojeops[:limit]
 
     # id를 string으로 변환
     for joojeop in sorted_joojeops:
         joojeop['_id'] = str(joojeop['_id'])
-        joojeop['isAuthor'] = False if joojeop['author_id'] != decode_jwt_from_cookie() else True
-        joojeop['isLiked'] = True if decode_jwt_from_cookie() in joojeop.get('liked_by', []) else False
+        joojeop['isAuthor'] = False if joojeop['author_id'] != decode_jwt_from_cookie(
+        ) else True
+        joojeop['isLiked'] = True if decode_jwt_from_cookie(
+        ) in joojeop.get('liked_by', []) else False
 
     return sorted_joojeops
 
@@ -437,15 +479,11 @@ def get_today_joojeops_by_coach_name(coach_name):
     """
     오늘 작성된 주접들을 코치 이름을 입력받아 좋아요 순으로 반환하고, 10개까지만 반환하는 함수
     """
-    today = datetime.datetime.now().date()  # 현재 날짜 (시간 제외)
-    start_of_day = datetime.datetime.combine(
-        today, datetime.time.min)  # 00:00:00
-    end_of_day = datetime.datetime.combine(
-        today, datetime.time.max)    # 23:59:59.999999
+    today_str = datetime.datetime.now().date()  # 현재 날짜 (시간 제외)
 
     query = {
         "coach_name": coach_name,
-        "date": {"$gte": start_of_day, "$lt": end_of_day}  # 오늘 날짜 범위 조회
+        "date": {"$regex": f"^{today_str}"}  # 날짜 문자열이 오늘 날짜로 시작하는 문서 조회
     }
     joojeops = list(db.joojeops.find(query))
 
@@ -476,7 +514,7 @@ def scheduled_job():
 
 
 scheduler.add_job(id="scheduled_job", func=scheduled_job,
-                  trigger="cron", hour=11, minute=9)
+                  trigger="cron", hour=23, minute=00)
 
 
 if __name__ == '__main__':
