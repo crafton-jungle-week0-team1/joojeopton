@@ -640,26 +640,28 @@ def make_joojeop_message_for_coach(coach_name, best_limit, worst_limit):
     worst_list = [item for item in worst_list if item['_id'] not in best_ids]
 
     if len(best_list) == 0 and len(worst_list) == 0:
-        return f"[ 오늘 {coach_name} 코치님의 주접이 없습니다. 😢 ]"
+        return f"[ 오늘 _{coach_name} 코치_ 님의 주접이 없습니다😢 ]"
 
-    message = "=============================================================\n"
+    message = "🌟===================================================🌟\n"
     if len(best_list) == 0:
-        message += f"[ 오늘 {coach_name} 코치님의 Worst 주접입니다. ]\n"
+        message += f"[ 오늘 *{coach_name} 코치* 님의 Worst 주접입니다. ]\n"
     elif len(worst_list) == 0:
-        message += f"[ 오늘 {coach_name} 코치님의 Best 주접입니다. ]\n"
+        message += f"[ 오늘 *{coach_name} 코치* 님의 Best 주접입니다. ]\n"
     else:
-        message = f"[ 오늘 {coach_name} 코치님의 Best 주접과 worst 주접입니다!! ]\n-----------------------------------------\n"
+        message = f"[ 오늘 *{coach_name} 코치* 님의 Best 주접과 worst 주접입니다!! ]\n\n"
     count = 0
-    message += "< Best 주접 >\n" if len(best_list) != 0 else ""
+    if len(best_list) != 0:
+        message += "✨ *Best 주접* ✨\n" + "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
     for joojeop in best_list:
         count += 1
-        message += f"{count}. {joojeop['content']} \n| <작성자> : {joojeop['author_name']} | 좋아요 {joojeop['like']}개 |\n"
-    message += "\n=============================================================\n\n"
+        message += f">#{count}. {joojeop['content']}  |  👤 {joojeop['author_name']} | ❤️ {joojeop['like']}개\n\n"
     count = 0
-    message += "< Worst 주접 >\n" if len(worst_list) != 0 else ""
+    if len(worst_list) != 0:
+        message += "\n💀 *Worst 주접* 💀\n" + "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
     for joojeop in worst_list:
         count += 1
-        message += f"{count}. {joojeop['content']} | 작성자 : {joojeop['author_name']} | 싫어요 {joojeop['dislike']}개 |\n"
+        message += f">#{count}. {joojeop['content']}  |  👤 {joojeop['author_name']} | 👎 {joojeop['dislike']}개\n\n"
+    message += "\n🌟===================================================🌟\n\n"
     return message
 
 
