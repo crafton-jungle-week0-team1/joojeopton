@@ -33,8 +33,8 @@
                 return uri + separator + key + "=" + value;
             }
         }
-        function empty_content(coachName, sortOrder) {
-            $.post(`/joojeop/${encodeURIComponent(coachName)}`, {}, function (data) {
+        function empty_content(coachID, sortOrder) {
+            $.post(`/joojeop/${encodeURIComponent(coachID)}`, {}, function (data) {
                 alert("주접이 저장되었습니다!");
                 location.reload();
             });
@@ -50,7 +50,7 @@
                 $(".keyword-btn").removeClass("bg-sky-200");
                 $(this).addClass("bg-sky-200");
             });
-            let coachName = "{{ coach.name }}";
+            let coachID = "{{ coach.id }}";
             let sortOrder = "{{ sort_order }}";
 
             $('.generate-btn.gemini').on('submit', function (e) {
@@ -66,7 +66,7 @@
                     //e.preventDefault(); // 폼 전송 중단
                     return false;
                 }
-                this.action = `/joojeop/${coachName}/${encodeURIComponent(
+                this.action = `/joojeop/${coachID}/${encodeURIComponent(
                     selectedKeyword
                 )}/generate/gemini?sort_order=${sortOrder}&filter=${filter}`;
             });
@@ -84,7 +84,7 @@
                     //e.preventDefault(); // 폼 전송 중단
                     return false;
                 }
-                this.action = `/joojeop/${coachName}/${encodeURIComponent(selectedKeyword)}/generate/gpt?sort_order=${sortOrder}&filter=${filter}`;
+                this.action = `/joojeop/${coachID}/${encodeURIComponent(selectedKeyword)}/generate/gpt?sort_order=${sortOrder}&filter=${filter}`;
             });
 
             $(".save-btn").on("click", function (e) {
@@ -105,12 +105,12 @@
                 filter = currentFilter; // Update the sortOrder variable
 
                 $.post(
-                    `/joojeop/${encodeURIComponent(coachName)}/${sortOrder}/save`,
+                    `/joojeop/${encodeURIComponent(coachID)}/${sortOrder}/save`,
                     {
                         content: content,
                     },
                     function (data) {
-                        window.location.href = `/joojeop/${encodeURIComponent(coachName)}?sort_order=${sortOrder}&filter=${filter}`;
+                        window.location.href = `/joojeop/${encodeURIComponent(coachID)}?sort_order=${sortOrder}&filter=${filter}`;
                     }
                 );
             });
@@ -256,7 +256,7 @@
 
             <div class="col-span-2 mt-4 space-y-4">
                 <div class="result border p-5 min-h-48">
-                    <textarea name="" id="content-text-area"
+                    <textarea id="content-text-area"
                         class="result child w-full min-h-48 resize-none border-none focus:outline-none">{{ content }}</textarea>
                 </div>
 

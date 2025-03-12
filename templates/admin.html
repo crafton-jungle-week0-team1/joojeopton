@@ -148,6 +148,22 @@
                     alert("이름과 이미지를 입력해주세요.");
                     return;
                 }
+                let formData = new FormData();
+                formData.append("name", name);
+                formData.append("image", image);
+                $.ajax({
+                    type: "POST",
+                    url: "/admin/save-coach",
+                    contentType: false,
+                    processData: false,
+                    data: formData,
+                    success: function (response) {
+                        alert("대상 추가에 성공했습니다.");
+                    },
+                    error: function () {
+                        alert("대상 추가에 실패했습니다.");
+                    }
+                });
                 alert(`대상 추가됨:\n이름: ${name}\n이미지: ${image.name}`);
             });
         });
