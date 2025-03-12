@@ -45,7 +45,6 @@ app.register_blueprint(github_bp, url_prefix="/login")
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET")
 
 
-
 # 맨 처음 접속하면 띄워지는 페이지. 모든 코치진의 사진과 이름을 보여준다.
 # 각 코치진을 클릭하면 그 코치의 주접을 볼 수 있는 페이지로 넘어간다.
 @app.route('/', methods=['GET'])
@@ -80,7 +79,10 @@ def login():
 
 @app.route('/joojeop/<coach_name>/<sort_order>', methods=['GET'])
 def joojeop(coach_name, sort_order):
-    print("joojeop 함수 호출")
+    user_id = decode_jwt_from_cookie()
+    if user_id is None:
+        return redirect(url_for("login"))
+    user = get_user_by_user_id(user_id)
     # 클라이언트에서 선택한 코치 이름 path variable로 받아오기
     # 코치 딕셔너리 생성
     coach = {"name": coach_name, "path": f"images/{coach_name}.png"}
@@ -91,7 +93,7 @@ def joojeop(coach_name, sort_order):
     content = request.args.get('content', '')
 
     # 코치 데이터 템플릿에 넘겨주기
-    return render_template("joojeop.html", coach=coach, joojeops=joojeops, sort_order=sort_order, content=content)
+    return render_template("joojeop.html", coach=coach, joojeops=joojeops, sort_order=sort_order, content=content, user=user)
 
 
 @app.route('/joojeop/<joojeop_id>/like', methods=['POST'])
@@ -412,10 +414,12 @@ def get_today_joojeops_by_coach_name(coach_name):
 
 
 def make_joojeop_message_for_coach(coach_name):
-    list = get_today_joojeops_by_coach_name(coach_name, order='like', limit=10)
-    message = f"{coach_name}님에게 온 주접입니다 !!\n-----------------------------------------\n"
+    list = get_today_joojeops_by_coach_name(coach_name)
+    message = f"오늘 {len(list)}명이 {coach_name}님 주접을 떨었습니다\n-----------------------------------------\n"
+    count = 0
     for joojeop in list:
-        message += f"{joojeop['content']} | 작성자 : {joojeop['author_name']} | {joojeop['like']}개\n"
+        count += 1
+        message += f"{count}. {joojeop['content']} | 작성자 : {joojeop['author_name']} | 좋아요 {joojeop['like']}개\n"
     return message
 
 
