@@ -88,6 +88,7 @@ def joojeop(coach_name, sort_order):
     coach = {"name": coach_name, "path": f"images/{coach_name}.png"}
     # 해당 코치의 주접 리스트만 표현하도록 업데이트
     joojeops = get_joojeops_by_coach_name(coach_name, sort_order)
+    print(joojeops)
     # get content from query string if exists
     content = request.args.get('content', '')
 
