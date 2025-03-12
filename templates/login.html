@@ -19,13 +19,14 @@
     <!-- 오른쪽 로그인 영역 -->
     <div class="w-1/2 flex flex-col items-center justify-center">
         <h1 class="text-2xl font-bold mb-6">정글 주접톤</h1>
+        <span class="mb-4">오늘의 주접이, 내일의 커밋으로!</span>
 
         <!-- Google 로그인 버튼 -->
         <button 
         class="w-64 flex items-center justify-center border border-blue-500 text-blue-500 rounded-lg px-4 py-2 mb-4 hover:bg-blue-100"
         onclick="window.location.href='/google'">
             <img src="https://www.svgrepo.com/show/355037/google.svg" alt="Google" class="w-5 h-5 mr-2">
-            Log in with Google
+            구글로 로그인
         </button>
 
         <!-- GitHub 로그인 버튼 -->
@@ -33,8 +34,14 @@
         class="w-64 flex items-center justify-center border border-blue-500 text-blue-500 rounded-lg px-4 py-2 hover:bg-blue-100"
         onclick="window.location.href='/github'">
             <img src="https://www.svgrepo.com/show/512317/github-142.svg" alt="GitHub" class="w-5 h-5 mr-2">
-            Log in with GitHub
+            깃헙으로 로그인
         </button>
+
+        <!-- 메인 페이지로 이동하는 버튼 -->
+        <a href="/index" class="w-64 text-center text-gray-500 rounded-lg px-4 py-2 mt-4 hover:bg-gray-100">
+            로그인 없이 구경하기
+        </a>
+
     </div>
     <span>
 </body>

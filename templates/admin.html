@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>슬랙 발송 옵션 설정</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="bg-white p-6 rounded-xl shadow-lg w-96">
+        <h2 class="text-xl font-semibold text-gray-700 mb-4">슬랙 발송 옵션 설정</h2>
+
+        <!-- 발송 시간 설정 -->
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-600">발송 시간</label>
+            <div class="flex gap-2 mt-1">
+                <select id="send-hour" class="w-1/2 p-2 border rounded-lg">
+                    <script>
+                        for (let i = 0; i < 24; i++) {
+                            document.write(`<option value="${i}">${i}시</option>`);
+                        }
+                    </script>
+                </select>
+                <select id="send-minute" class="w-1/2 p-2 border rounded-lg">
+                    <script>
+                        for (let i = 0; i < 60; i++) {
+                            document.write(`<option value="${i}">${i}분</option>`);
+                        }
+                    </script>
+                </select>
+            </div>
+        </div>
+
+        <!-- 발송 메시지 개수 설정 -->
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-600">발송 메시지 개수</label>
+            <div class="flex gap-2 mt-1">
+                <input type="number" id="best-message-count" class="w-1/2 p-2 border rounded-lg" placeholder="Best 개수" min="1">
+                <input type="number" id="worst-message-count" class="w-1/2 p-2 border rounded-lg" placeholder="Worst 개수" min="1">
+            </div>
+        </div>
+
+        <!-- 버튼 -->
+        <div class="flex justify-between mt-6">
+            <button id="cancel-btn" class="px-4 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300">취소</button>
+            <button id="save-btn" class="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600">저장</button>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $("#cancel-btn").click(function () {
+                $("#send-hour").val(0);
+                $("#send-minute").val(0);
+                $("#best-message-count").val("");
+                $("#worst-message-count").val("");
+            });
+
+            $("#save-btn").click(function () {
+                let hour = $("#send-hour").val();
+                let minute = $("#send-minute").val();
+                let bestCount = $("#best-message-count").val();
+                let worstCount = $("#worst-message-count").val();
+
+                alert(`설정 저장됨:\n발송 시간: ${hour}시 ${minute}분\nBest 메시지: ${bestCount}개\nWorst 메시지: ${worstCount}개`);
+            });
+        });
+    </script>
+
+</body>
+</html>
