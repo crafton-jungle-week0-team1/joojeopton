@@ -721,6 +721,7 @@ def make_joojeop_message_for_coach(coach_id, best_limit, worst_limit):
 
 
 def scheduled_job():
+    coaches = list(db.coaches.find())
     for coach in coaches:
         slack.send_slack_message(make_joojeop_message_for_coach(
             coach["name"], BEST_LIMIT, WORST_LIMIT))

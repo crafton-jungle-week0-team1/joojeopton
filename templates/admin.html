@@ -35,8 +35,14 @@
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
     <div>
         <div class="bg-white p-6 rounded-xl shadow-lg w-96">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">관리자 페이지</h2>
-
+            <div class="flex flex-row space-x-4">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">관리자 페이지</h2>
+                <span class="flex flex-col items-center">
+                    <a href="/" class="w-64 text-right text-gray-500 rounded-lg py-2 mt-4 hover:bg-gray-100">
+                        주접 떨러 돌아가기
+                    </a>
+                </span>
+            </div>
             <!-- 탭 메뉴 -->
             <div class="flex border-b mb-4">
                 <button class="tab-btn px-4 py-2 border-b-2 border-blue-500 text-blue-500 focus:border-blue-500"
@@ -121,141 +127,139 @@
                 <div class="mt-6">
                     <h3 class="text-md font-medium text-gray-700 mb-2">등록된 대상 목록</h3>
                     <div class="max-h-60 overflow-y-auto border rounded-lg p-2">
-                {%for coach in coaches%}
-                <div class="flex items-center mt-4">
-                    <img src="{{ url_for('static', filename=coach.path) }}" alt="{{coach.name}}" class="w-12 h-12 rounded-full" />
-                    <span class="ml-4 text-lg font-semibold">{{coach.name}}</span>
-                    <button class="delete-btn ml-auto px-2 py-1 text-white bg-red-500 rounded-lg hover:bg-red-600">삭제
-                        <input type="text" value="{{coach.id}}" hidden />
-                    </button>
+                        {%for coach in coaches%}
+                        <div class="flex items-center mt-4">
+                            <img src="{{ url_for('static', filename=coach.path) }}" alt="{{coach.name}}"
+                                class="w-12 h-12 rounded-full" />
+                            <span class="ml-4 text-lg font-semibold">{{coach.name}}</span>
+                            <button
+                                class="delete-btn ml-auto px-2 py-1 text-white bg-red-500 rounded-lg hover:bg-red-600">삭제
+                                <input type="text" value="{{coach.id}}" hidden />
+                            </button>
+                        </div>
+                        {%endfor%}
+                    </div>
                 </div>
-                {%endfor%}
-            </div>
-            <div class="flex flex-col items-center">
-                <a href="/" class="w-64 text-center text-gray-500 rounded-lg px-4 py-2 mt-4 hover:bg-gray-100">
-                    주접 떨러 돌아가기
-                </a>
-            </div>
-        </div>
 
-        <script>
-            $(document).ready(function () {
-                // 초기 탭 설정 (슬랙 발송 옵션이 기본 선택됨)
-                $(".tab-content").addClass("hidden");
-                $("#sendNow").removeClass("hidden"); // 기본 활성화
-                $(".tab-btn").removeClass("border-blue-500 text-blue-500");
-                $(".tab-btn[data-tab='sendNow']").addClass(
-                    "border-blue-500 text-blue-500"
-                );
 
-                // 탭 변경 이벤트
-                $(".tab-btn").click(function () {
-                    let targetTab = $(this).data("tab");
+                <script>
+                    $(document).ready(function () {
+                        // 초기 탭 설정 (슬랙 발송 옵션이 기본 선택됨)
+                        $(".tab-content").addClass("hidden");
+                        $("#sendNow").removeClass("hidden"); // 기본 활성화
+                        $(".tab-btn").removeClass("border-blue-500 text-blue-500");
+                        $(".tab-btn[data-tab='sendNow']").addClass(
+                            "border-blue-500 text-blue-500"
+                        );
 
-                    // 모든 콘텐츠 숨기기
-                    $(".tab-content").addClass("hidden");
-                    $("#" + targetTab).removeClass("hidden");
+                        // 탭 변경 이벤트
+                        $(".tab-btn").click(function () {
+                            let targetTab = $(this).data("tab");
 
-                    // 탭 스타일 변경
-                    $(".tab-btn").removeClass("border-blue-500 text-blue-500");
-                    $(this).addClass("border-blue-500 text-blue-500");
-                });
+                            // 모든 콘텐츠 숨기기
+                            $(".tab-content").addClass("hidden");
+                            $("#" + targetTab).removeClass("hidden");
 
-                // 슬랙 즉시 발송 버튼
-                $("#sendNow-btn").click(function () {
-                    if (!confirm("정말로 즉시 발송하시겠습니까?")) {
-                        return;
-                    }
-                    $.ajax({
-                        type: "POST",
-                        url: "/slack/send", // Flask에서 처리할 엔드포인트
-                        contentType: "application/json",
-                        success: function (response) {
-                            alert(response.message);
-                        },
-                        error: function () {
-                            alert("즉시 발송에 실패했습니다.");
-                        },
+                            // 탭 스타일 변경
+                            $(".tab-btn").removeClass("border-blue-500 text-blue-500");
+                            $(this).addClass("border-blue-500 text-blue-500");
+                        });
+
+                        // 슬랙 즉시 발송 버튼
+                        $("#sendNow-btn").click(function () {
+                            if (!confirm("정말로 즉시 발송하시겠습니까?")) {
+                                return;
+                            }
+                            $.ajax({
+                                type: "POST",
+                                url: "/slack/send", // Flask에서 처리할 엔드포인트
+                                contentType: "application/json",
+                                success: function (response) {
+                                    alert(response.message);
+                                },
+                                error: function () {
+                                    alert("즉시 발송에 실패했습니다.");
+                                },
+                            });
+
+                            let message = $("#instant-message").val().trim();
+                            alert(`즉시 발송됨:\n메시지: ${message}`);
+                        });
+
+                        // 슬랙 발송 옵션 취소 버튼
+                        $("#sendOption-cancel-btn").click(function () {
+                            $("#send-hour").val(0);
+                            $("#send-minute").val(0);
+                            $("#best-message-count").val("");
+                            $("#worst-message-count").val("");
+                        });
+
+                        // 슬랙 발송 옵션 저장 버튼
+                        $("#sendOption-save-btn").click(function () {
+                            let settings = {
+                                hour: $("#send-hour").val(),
+                                minute: $("#send-minute").val(),
+                                best_limit: $("#best-message-count").val(),
+                                worst_limit: $("#worst-message-count").val(),
+                            };
+                            $.ajax({
+                                type: "POST",
+                                url: "/slack/time",
+                                data: { hour: settings.hour, minute: settings.minute },
+                                success: function (response) {
+                                    alert(response.message);
+                                },
+                                error: function () {
+                                    alert("슬랙 메시지 전송 시간 설정에 실패했습니다.");
+                                },
+                            });
+                            $.ajax({
+                                type: "POST",
+                                url: "/slack/limit",
+                                data: {
+                                    best_limit: settings.best_limit,
+                                    worst_limit: settings.worst_limit,
+                                },
+                                success: function (response) {
+                                    alert(response.message);
+                                },
+                                error: function () {
+                                    alert("슬랙 메시지 갯수 제한 설정에 실패했습니다.");
+                                },
+                            });
+                            alert(
+                                `설정 저장됨:\n발송 시간: ${settings.hour}시 ${settings.minute}분\nBest 메시지: ${settings.best_limit}개\nWorst 메시지: ${settings.worst_limit}개`
+                            );
+                        });
+
+                        // 대상 추가 저장 버튼
+                        $("#character-save-btn").click(function () {
+                            let name = $("#character-name").val();
+                            let image = $("#character-image")[0].files[0];
+                            if (!name || !image) {
+                                alert("이름과 이미지를 입력해주세요.");
+                                return;
+                            }
+                            let formData = new FormData();
+                            formData.append("name", name);
+                            formData.append("image", image);
+                            $.ajax({
+                                type: "POST",
+                                url: "/admin/save-coach",
+                                contentType: false,
+                                processData: false,
+                                data: formData,
+                                success: function (response) {
+                                    window.location.href = "/admin";
+                                    alert("대상 추가에 성공했습니다.");
+                                },
+                                error: function () {
+                                    alert("대상 추가에 실패했습니다.");
+                                }
+                            });
+                        });
                     });
-
-                    let message = $("#instant-message").val().trim();
-                    alert(`즉시 발송됨:\n메시지: ${message}`);
-                });
-
-                // 슬랙 발송 옵션 취소 버튼
-                $("#sendOption-cancel-btn").click(function () {
-                    $("#send-hour").val(0);
-                    $("#send-minute").val(0);
-                    $("#best-message-count").val("");
-                    $("#worst-message-count").val("");
-                });
-
-                // 슬랙 발송 옵션 저장 버튼
-                $("#sendOption-save-btn").click(function () {
-                    let settings = {
-                        hour: $("#send-hour").val(),
-                        minute: $("#send-minute").val(),
-                        best_limit: $("#best-message-count").val(),
-                        worst_limit: $("#worst-message-count").val(),
-                    };
-                    $.ajax({
-                        type: "POST",
-                        url: "/slack/time",
-                        data: { hour: settings.hour, minute: settings.minute },
-                        success: function (response) {
-                            alert(response.message);
-                        },
-                        error: function () {
-                            alert("슬랙 메시지 전송 시간 설정에 실패했습니다.");
-                        },
-                    });
-                    $.ajax({
-                        type: "POST",
-                        url: "/slack/limit",
-                        data: {
-                            best_limit: settings.best_limit,
-                            worst_limit: settings.worst_limit,
-                        },
-                        success: function (response) {
-                            alert(response.message);
-                        },
-                        error: function () {
-                            alert("슬랙 메시지 갯수 제한 설정에 실패했습니다.");
-                        },
-                    });
-                    alert(
-                        `설정 저장됨:\n발송 시간: ${settings.hour}시 ${settings.minute}분\nBest 메시지: ${settings.best_limit}개\nWorst 메시지: ${settings.worst_limit}개`
-                    );
-                });
-
-                // 대상 추가 저장 버튼
-                $("#character-save-btn").click(function () {
-                    let name = $("#character-name").val();
-                    let image = $("#character-image")[0].files[0];
-                    if (!name || !image) {
-                        alert("이름과 이미지를 입력해주세요.");
-                        return;
-                    }
-                    let formData = new FormData();
-                    formData.append("name", name);
-                    formData.append("image", image);
-                    $.ajax({
-                        type: "POST",
-                        url: "/admin/save-coach",
-                        contentType: false,
-                        processData: false,
-                        data: formData,
-                        success: function (response) {
-                            window.location.href = "/admin";
-                            alert("대상 추가에 성공했습니다.");
-                        },
-                        error: function () {
-                            alert("대상 추가에 실패했습니다.");
-                        }
-                    });
-                });
-            });
-        </script>
+                </script>
 </body>
 
 </html>
