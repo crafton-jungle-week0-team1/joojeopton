@@ -68,6 +68,10 @@
             $(".save-btn").on("click", function (e) {
                 e.preventDefault();
                 let content = $(".result").text();
+                if (!content) {
+                    alert("주접을 먼저 생성해주세요!");
+                    return;
+                }
                 $.post(
                     `/joojeop/${encodeURIComponent(coachName)}/${sortOrder}/save`,
                     {
@@ -99,6 +103,7 @@
                 e.preventDefault();
                 let joojeop_id = $(this).find('input[name="joojeop_id"]').val();
                 $.post(`/joojeop/${joojeop_id}/delete`, {}, function (data) {
+                    
                     location.reload();
                 });
             });
