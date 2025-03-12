@@ -28,6 +28,9 @@ GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID")
 GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET")
 
+BEST_LIMIT = 5
+WORST_LIMIT = 5
+
 # 구글 소셜 로그인
 google_bp = make_google_blueprint(
     client_id=GOOGLE_CLIENT_ID,
@@ -46,26 +49,29 @@ github_bp = make_github_blueprint(
 app.register_blueprint(github_bp, url_prefix="/login")
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET")
 
+# 코치 DB, 픽스 값으로 유지
+coaches = [
+    {"name": "김정민", "path": "images/김정민.png"},
+    {"name": "김현수", "path": "images/김현수.png"},
+    {"name": "방효식", "path": "images/방효식.png"},
+    {"name": "백승현", "path": "images/백승현.png"},
+    {"name": "안예인", "path": "images/안예인.png"},
+    {"name": "유윤선", "path": "images/유윤선.png"},
+    {"name": "이동석", "path": "images/이동석.png"},
+    {"name": "이승민", "path": "images/이승민.png"},
+]
 
 # 맨 처음 접속하면 띄워지는 페이지. 모든 코치진의 사진과 이름을 보여준다.
 # 각 코치진을 클릭하면 그 코치의 주접을 볼 수 있는 페이지로 넘어간다.
+
+
 @app.route('/', methods=['GET'])
 def home():
     user_id = decode_jwt_from_cookie()
     user = None
     if user_id is not None:
         user = get_user_by_user_id(user_id)
-    # 코치 DB, 픽스 값으로 유지
-    coaches = [
-        {"name": "김정민", "path": "images/김정민.png"},
-        {"name": "김현수", "path": "images/김현수.png"},
-        {"name": "방효식", "path": "images/방효식.png"},
-        {"name": "백승현", "path": "images/백승현.png"},
-        {"name": "안예인", "path": "images/안예인.png"},
-        {"name": "유윤선", "path": "images/유윤선.png"},
-        {"name": "이동석", "path": "images/이동석.png"},
-        {"name": "이승민", "path": "images/이승민.png"},
-    ]
+
     order = request.args.get('order', 'newest')  # 기본값 newest
     filter_option = request.args.get('filter', 'all')  # 기본값 all
     sorted_joojeops = get_joojeops(order, filter_option=filter_option)
@@ -293,6 +299,14 @@ def slack_time():
         status_code = 400
 
     return jsonify(response), status_code
+
+
+@app.route("/slack/limit", methods=["POST"])  # 슬랙 메세지 리미트 설정
+def slack_limit():
+    global BEST_LIMIT, WORST_LIMIT
+    BEST_LIMIT = int(request.form.get("best_limit"))
+    WORST_LIMIT = int(request.form.get("worst_limit"))
+    return jsonify({"success": True, "message": "Updated limit"}), 200
 
 
 def get_user_and_authorization_by_jwt():
@@ -525,7 +539,7 @@ def get_joojeops(order='newest', limit=5, filter_option='all'):
     return sorted_joojeops
 
 
-def get_today_joojeops_by_coach_name(coach_name):
+def get_today_best_joojeops_by_coach_name(coach_name, limit=5):
     """
     오늘 작성된 주접들을 코치 이름을 입력받아 좋아요 순으로 반환하고, 10개까지만 반환하는 함수
     """
@@ -533,12 +547,30 @@ def get_today_joojeops_by_coach_name(coach_name):
 
     query = {
         "coach_name": coach_name,
-        "date": {"$regex": f"^{today_str}"}  # 날짜 문자열이 오늘 날짜로 시작하는 문서 조회
+        "date": {"$regex": f"^{today_str}"}
     }
-    joojeops = list(db.joojeops.find(query))
+    top_10_joojeops = list(db.joojeops.find(
+        query).sort("like", -1).limit(limit))
 
-    sorted_joojeops = sorted(joojeops, key=lambda x: x['like'], reverse=True)
-    top_10_joojeops = sorted_joojeops[:10]
+    # id를 string으로 변환
+    for joojeop in top_10_joojeops:
+        joojeop['_id'] = str(joojeop['_id'])
+
+    return top_10_joojeops
+
+
+def get_today_worst_joojeops_by_coach_name(coach_name, limit=5):
+    """
+    오늘 작성된 주접들을 코치 이름을 입력받아 좋아요 순으로 반환하고, 10개까지만 반환하는 함수
+    """
+    today_str = datetime.datetime.now().date()  # 현재 날짜 (시간 제외)
+
+    query = {
+        "coach_name": coach_name,
+        "date": {"$regex": f"^{today_str}"}
+    }
+    top_10_joojeops = list(db.joojeops.find(
+        query).sort("dislike", -1).limit(limit))
 
     # id를 string으로 변환
     for joojeop in top_10_joojeops:
@@ -549,18 +581,41 @@ def get_today_joojeops_by_coach_name(coach_name):
 # 코치님 이름으로 만들어진 주접 가져와서 메세지 만들기기
 
 
-def make_joojeop_message_for_coach(coach_name):
-    list = get_today_joojeops_by_coach_name(coach_name)
-    message = f"오늘 {len(list)}명이 {coach_name}님 주접을 떨었습니다\n-----------------------------------------\n"
+def make_joojeop_message_for_coach(coach_name, best_limit, worst_limit):
+    best_list = get_today_best_joojeops_by_coach_name(coach_name, best_limit)
+    worst_list = get_today_worst_joojeops_by_coach_name(
+        coach_name, worst_limit)
+    best_ids = {item['_id'] for item in best_list}
+    worst_list = [item for item in worst_list if item['_id'] not in best_ids]
+
+    if len(best_list) == 0 and len(worst_list) == 0:
+        return f"[ 오늘 {coach_name} 코치님의 주접이 없습니다. 😢 ]"
+
+    message = "=============================================================\n"
+    if len(best_list) == 0:
+        message += f"[ 오늘 {coach_name} 코치님의 Worst 주접입니다. ]\n"
+    elif len(worst_list) == 0:
+        message += f"[ 오늘 {coach_name} 코치님의 Best 주접입니다. ]\n"
+    else:
+        message = f"[ 오늘 {coach_name} 코치님의 Best 주접과 worst 주접입니다!! ]\n-----------------------------------------\n"
     count = 0
-    for joojeop in list:
+    message += "< Best 주접 >\n"
+    for joojeop in best_list:
         count += 1
-        message += f"{count}. {joojeop['content']} | 작성자 : {joojeop['author_name']} | 좋아요 {joojeop['like']}개\n"
+        message += f"{count}. {joojeop['content']} \n| <작성자> : {joojeop['author_name']} | 좋아요 {joojeop['like']}개 |\n"
+    message += "\n=============================================================\n\n"
+    count = 0
+    message += "< Worst 주접 >\n"
+    for joojeop in worst_list:
+        count += 1
+        message += f"{count}. {joojeop['content']} | 작성자 : {joojeop['author_name']} | 싫어요 {joojeop['dislike']}개 |\n"
     return message
 
 
 def scheduled_job():
-    slack.send_slack_message(make_joojeop_message_for_coach("이동석"))
+    for coach in coaches:
+        slack.send_slack_message(make_joojeop_message_for_coach(
+            coach["name"], BEST_LIMIT, WORST_LIMIT))
 
 
 scheduler.add_job(id="scheduled_job", func=scheduled_job,
