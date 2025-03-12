@@ -237,13 +237,13 @@
                     processData: false,
                     data: formData,
                     success: function (response) {
+                        window.location.href = "/admin";
                         alert("대상 추가에 성공했습니다.");
                     },
                     error: function () {
                         alert("대상 추가에 실패했습니다.");
                     }
                 });
-                alert(`대상 추가됨:\n이름: ${name}\n이미지: ${image.name}`);
             });
         });
     </script>
