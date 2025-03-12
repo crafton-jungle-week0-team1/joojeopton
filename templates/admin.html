@@ -119,12 +119,11 @@
 
             // 슬랙 발송 옵션 저장 버튼
             $("#sendOption-save-btn").click(function () {
-                let settings = {
-                    hour: $("#send-hour").val(),
-                    minute: $("#send-minute").val(),
-                    best_count: $("#best-message-count").val(),
-                    worst_count: $("#worst-message-count").val()
-                };
+                let hour: $("#send-hour").val(),
+                let minute: $("#send-minute").val(),
+                let best_count: $("#best-message-count").val(),
+                let worst_count: $("#worst-message-count").val()
+                
                 $.ajax({
                     type: "POST",
                     url: "/slack/time",
