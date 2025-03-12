@@ -66,6 +66,7 @@ def home():
     ]
     if user:
         order = request.args.get('order', 'newest')  # 기본값 newest
+        print(order)
         sorted_joojeops = get_joojeops(order)
         return render_template("index.html", user=user, coaches=coaches, joojeops=sorted_joojeops)
     else:
@@ -215,10 +216,8 @@ def generate_joojeop(coach_name, sort_order, keyword):
 
 @app.route("/joojeop/<coach_name>/<sort_order>/save", methods=["POST"])
 def save_joojeop_route(coach_name, sort_order):
-    print("save_joojeop 함수 호출")
     user_id = decode_jwt_from_cookie()
     user = get_user_by_user_id(user_id)
-    print(user)
     content = request.form.get("content")
     save_joojeop(user_id, user["name"], coach_name, content)
     return redirect(url_for("joojeop", coach_name=coach_name, sort_order=sort_order))
@@ -282,7 +281,7 @@ def save_joojeop(author_id, author_name, coach_name, content):
         "content": content,
         "author_name": author_name,
         "author_id": author_id,
-        "date": datetime.datetime.now().strftime("%Y-%m-%d"),
+        "date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "like": 0,
         "coach_name": coach_name,
         "liked_by": []
@@ -405,8 +404,16 @@ def get_today_joojeops_by_coach_name(coach_name):
     """
     오늘 작성된 주접들을 코치 이름을 입력받아 좋아요 순으로 반환하고, 10개까지만 반환하는 함수
     """
-    today = datetime.datetime.now().strftime("%Y-%m-%d")
-    query = {"coach_name": coach_name, "date": today}
+    today = datetime.datetime.now().date()  # 현재 날짜 (시간 제외)
+    start_of_day = datetime.datetime.combine(
+        today, datetime.time.min)  # 00:00:00
+    end_of_day = datetime.datetime.combine(
+        today, datetime.time.max)    # 23:59:59.999999
+
+    query = {
+        "coach_name": coach_name,
+        "date": {"$gte": start_of_day, "$lt": end_of_day}  # 오늘 날짜 범위 조회
+    }
     joojeops = list(db.joojeops.find(query))
 
     sorted_joojeops = sorted(joojeops, key=lambda x: x['like'], reverse=True)
@@ -436,7 +443,7 @@ def scheduled_job():
 
 
 scheduler.add_job(id="scheduled_job", func=scheduled_job,
-                  trigger="cron", hour=23, minute=0)
+                  trigger="cron", hour=11, minute=9)
 
 
 if __name__ == '__main__':
