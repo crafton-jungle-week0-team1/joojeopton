@@ -101,7 +101,7 @@ def like(joojeop_id):
     # 클라이언트에서 선택한 주접의 id를 받아오기
     # 해당 주접의 like 수를 1 증가시키기
     user_id = decode_jwt_from_cookie()
-    like_joojeop(int(joojeop_id), user_id)
+    like_joojeop(ObjectId(joojeop_id), user_id)
     return redirect(url_for("home"))
 
 
@@ -338,6 +338,8 @@ def get_joojeops_by_coach_name(coach_name, order='newest', limit=None):
     # _id를 string으로 변환
     for joojeop in sorted_joojeops:
         joojeop['_id'] = str(joojeop['_id'])
+        joojeop['isAuthor'] = False if joojeop['author_id'] != decode_jwt_from_cookie() else True
+        joojeop['isLiked'] = True if decode_jwt_from_cookie() in joojeop.get('liked_by', []) else False
 
     return sorted_joojeops
 
@@ -398,7 +400,7 @@ def get_joojeops(order='newest', limit=None):
     for joojeop in sorted_joojeops:
         joojeop['_id'] = str(joojeop['_id'])
         joojeop['isAuthor'] = False if joojeop['author_id'] != decode_jwt_from_cookie() else True
-        
+        joojeop['isLiked'] = True if decode_jwt_from_cookie() in joojeop.get('liked_by', []) else False
 
     return sorted_joojeops
 
