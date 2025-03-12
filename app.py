@@ -45,7 +45,6 @@ app.register_blueprint(github_bp, url_prefix="/login")
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET")
 
 
-
 # 맨 처음 접속하면 띄워지는 페이지. 모든 코치진의 사진과 이름을 보여준다.
 # 각 코치진을 클릭하면 그 코치의 주접을 볼 수 있는 페이지로 넘어간다.
 @app.route('/', methods=['GET'])
@@ -99,9 +98,6 @@ def like(joojeop_id):
     # 해당 주접의 like 수를 1 증가시키기
     like_joojeop(int(joojeop_id))
     return redirect(url_for("home"))
-
-
-
 
 
 @app.route("/google")  # ✅ Google 로그인 처리
@@ -414,10 +410,12 @@ def get_today_joojeops_by_coach_name(coach_name):
 
 
 def make_joojeop_message_for_coach(coach_name):
-    list = get_today_joojeops_by_coach_name(coach_name, order='like', limit=10)
-    message = f"{coach_name}님에게 온 주접입니다 !!\n-----------------------------------------\n"
+    list = get_today_joojeops_by_coach_name(coach_name)
+    message = f"오늘 {len(list)}명이 {coach_name}님 주접을 떨었습니다\n-----------------------------------------\n"
+    count = 0
     for joojeop in list:
-        message += f"{joojeop['content']} | 작성자 : {joojeop['author_name']} | {joojeop['like']}개\n"
+        count += 1
+        message += f"{count}. {joojeop['content']} | 작성자 : {joojeop['author_name']} | 좋아요 {joojeop['like']}개\n"
     return message
 
 
