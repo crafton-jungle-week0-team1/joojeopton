@@ -104,6 +104,13 @@ def like(joojeop_id):
     like_joojeop(joojeop_id, user_id)
     return redirect(url_for("home"))
 
+@app.route('/joojeop/<joojeop_id>/delete', methods=['POST'])
+def delete_joojeop(joojeop_id):
+    # 클라이언트에서 선택한 주접의 id를 받아오기
+    # 해당 주접 삭제
+    object_id = ObjectId(joojeop_id)
+    db.joojeops.delete_one({"_id": object_id})
+    return redirect(url_for("home"))
 
 @app.route("/google")  # ✅ Google 로그인 처리
 def google_login():

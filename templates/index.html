@@ -29,6 +29,15 @@
                     location.reload();
                 });
             });
+            $('.delete-btn').on('click', function (e) {
+                e.preventDefault();
+                let joojeop_id = $(this).find('input[name="joojeop_id"]').val();
+                $.post(`/joojeop/${joojeop_id}/delete`, {
+
+                }, function (data) {
+                    location.reload();
+                });
+            });
         });
     </script>
 </head>
@@ -111,13 +120,17 @@
                         {{ joojeop.like }} likes
                     </span>
                     {% if joojeop.isAuthor %}
-                    <button class="delete-btn bg-white border border-red-300 text-red-400 hover:bg-red-50 p-2 block mx-auto"
-                        onclick="location.href='joojeop/{{ joojeop._id }}/delete'"> 삭제</button>
+                    <input type="hidden" name="joojeop_id" value="{{ joojeop._id }}">
+                    <button
+                        class="delete-btn bg-white border border-red-300 text-red-400 hover:bg-red-50 p-2 block mx-auto"> 
+                        삭제
+                        <input type="hidden" name="joojeop_id" value="{{ joojeop._id }}">
+                    </button>
                     {% endif %}
-                    
+
                 </div>
             </div>
-            {% endfor %}    
+            {% endfor %}
         </div>
 </body>
 
