@@ -13,7 +13,7 @@ from bson.objectid import ObjectId
 from flask import jsonify
 from werkzeug.utils import secure_filename
 
-client = MongoClient("mongodb://localhost:27017/")
+client = MongoClient(os.getenv("MONGODB_URL"))
 db = client.jujeopton
 app = Flask(__name__)
 app.config['SCHEDULER_API_ENABLED'] = True
@@ -65,6 +65,7 @@ app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET")
 #     {"name": "이승민", "path": "images/8.png", "id": "8"},
 # ]
 
+
 def save_coach(coach):
     db.coaches.insert_one(coach)
 # 맨 처음 접속하면 띄워지는 페이지. 모든 코치진의 사진과 이름을 보여준다.
@@ -98,6 +99,7 @@ def save_coach_route():
     save_coach(coach)
     return redirect(url_for("admin"))
 
+
 @app.route('/admin/delete-coach', methods=['POST'])
 def delete_coach():
     coach_id = request.form.get("coach_id")
@@ -107,6 +109,7 @@ def delete_coach():
     db.coaches.delete_one({"_id": ObjectId(coach_id)})
     return redirect(url_for("admin"))
 
+
 @app.route('/', methods=['GET'])  # 인덱스 페이지
 def home():
     user_id = decode_jwt_from_cookie()
@@ -115,7 +118,7 @@ def home():
         user = get_user_by_user_id(user_id)
 
     if user_id in ADMIN_LIST and user is not None:
-        user["is_admin"] = True 
+        user["is_admin"] = True
 
     sort_order = request.args.get('sort_order', 'newest')  # 기본값 newest
     filter_option = request.args.get('filter', 'all')  # 기본값 all
@@ -724,7 +727,7 @@ def make_joojeop_message_for_coach(coach_id, best_limit, worst_limit):
 def scheduled_job():
     coaches = list(db.coaches.find())
     for coach in coaches:
-        coach['id'] = str(coach['_id'])   
+        coach['id'] = str(coach['_id'])
         slack.send_slack_message(make_joojeop_message_for_coach(
             coach["id"], BEST_LIMIT, WORST_LIMIT))
 
