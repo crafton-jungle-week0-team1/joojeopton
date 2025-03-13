@@ -308,7 +308,7 @@ def generate_joojeop_gemini(coach_id, keyword):
     coach = db.coaches.find_one({"_id": ObjectId(coach_id)})
     coach_name = coach["name"]
     content = gemini.get_gemini_response(
-        f"{coach_name}에 대한 주접 하나 만들어줘. 트위터 말투. 키워드:{keyword}")
+        f"{coach_name}에 대한 주접 하나 만들어줘. 트위터 말투. 주의사항: 직업 언급 금지. 키워드:{keyword}")
     print(content)
     sort_order = request.args.get('sort_order', 'newest')
     filter = request.args.get('filter', 'all')
