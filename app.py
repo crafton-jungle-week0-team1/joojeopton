@@ -117,9 +117,9 @@ def home():
     if user_id in ADMIN_LIST and user is not None:
         user["is_admin"] = True 
 
-    order = request.args.get('order', 'newest')  # 기본값 newest
+    sort_order = request.args.get('sort_order', 'newest')  # 기본값 newest
     filter_option = request.args.get('filter', 'all')  # 기본값 all
-    sorted_joojeops = get_joojeops(order, filter_option=filter_option)
+    sorted_joojeops = get_joojeops(sort_order, filter_option=filter_option)
     coaches = list(db.coaches.find())
     for coach in coaches:
         coach["id"] = str(coach["_id"])
@@ -517,9 +517,6 @@ def get_joojeops_by_coach_id(coach_id, order='newest', limit=None, filter_option
     query = {}
     if coach_id:
         query["coach_id"] = coach_id
-    query = {}
-    if coach_id:
-        query["coach_id"] = coach_id
 
     joojeops = list(db.joojeops.find(query))
 
@@ -600,6 +597,7 @@ def get_joojeops(order='newest', limit=None, filter_option='all'):
     :return: 정렬된 주접 리스트
     """
     joojeops = list(db.joojeops.find())
+    print("sort_order: ", order)
 
     if order == 'newest':
         sorted_joojeops = sorted(
