@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 import datetime
 import os
 from flask import Flask, redirect, request, jsonify, render_template, url_for
@@ -12,6 +14,9 @@ import slack
 from bson.objectid import ObjectId
 from flask import jsonify
 from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
+
+load_dotenv()
 
 client = MongoClient(os.getenv("MONGODB_URL"))
 db = client.jujeopton
@@ -375,7 +380,7 @@ def slack_time():
             hour=hour,
             minute=minute
         )
-        return jsonify({"success": True, "message": f"전송 시간이 {hour}시 {minute}분으로 설정되었습니다."}), 200
+        return redirect(url_for("admin"))
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400
 
@@ -390,7 +395,7 @@ def slack_limit():
     BEST_LIMIT = int(request.form.get("best_limit"))
     WORST_LIMIT = int(request.form.get("worst_limit"))
     print(BEST_LIMIT, WORST_LIMIT)
-    return jsonify({"success": True, "message": "Updated limit"}), 200
+    return redirect(url_for("admin"))
 
 
 # 슬랙 메세지 즉시 전송
@@ -400,7 +405,7 @@ def slack_send():
     if user_id not in ADMIN_LIST:
         return jsonify({"success": False, "message": "관리자만 접근 가능합니다."}), 403
     scheduled_job()
-    return jsonify({"success": True, "message": "Sent slack message"}), 200
+    return redirect(url_for("admin"))
 
 
 def get_user_and_authorization_by_jwt():
@@ -737,4 +742,4 @@ scheduler.add_job(id="scheduled_job", func=scheduled_job,
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True, host="0.0.0.0", port=5001)
