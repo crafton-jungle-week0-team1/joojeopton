@@ -1,21 +1,25 @@
 services:
   app:
     container_name: joojeopton-container
-    build: .    # 도커파일로 직접 빌드
+    build: .                    # 도커파일로 직접 빌드
     env_file:
-      - .env                                # 서버에만 존재
+      - .env                    # 서버에만 존재
     ports:
-      - "5001:5001"                         # 호스트 5001 → 컨테이너 5001
+      - "5001:5001"             # 호스트 5001 → 컨테이너 5001
     depends_on:
       - mongodb
+    volumes:
+      - ./static:/app/static    # 정적/업로드 파일 공유 (호스트-컨테이너)
 
   mongodb:
     container_name: mongodb
     image: mongo:latest
     volumes:
-      - mongo_data:/data/db
+      - mongo_data:/data/db     # 기존 볼륨 재사용
     ports:
       - "27017:27017"
       
 volumes:
   mongo_data:
+    external: true
+    name: mongo_data
