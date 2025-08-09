@@ -1,22 +1,21 @@
 services:
   app:
-    build: .    # 도커파일로 직접 빌드
-    image: juniperjeong/joojeobton:latest   # Actions가 푸시한 이미지 사용
     container_name: joojeopton-container
+    build: .    # 도커파일로 직접 빌드
     env_file:
       - .env                                # 서버에만 존재
     ports:
       - "5001:5001"                         # 호스트 5001 → 컨테이너 5001
     depends_on:
       - mongodb
-    restart: unless-stopped
 
   mongodb:
-    image: mongo:latest
     container_name: mongodb
+    image: mongo:latest
     volumes:
       - mongo_data:/data/db
-    restart: unless-stopped
-
+    ports:
+      - "27017:27017"
+      
 volumes:
   mongo_data:
