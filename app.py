@@ -93,14 +93,14 @@ def save_coach_route():
         # Generate a secure filename
         filename = secure_filename(image.filename)
         # Create the path where the file will be saved
-        image_dir = os.path.join("static", "images")
+        image_dir = os.path.join("static", "uploads")
         if not os.path.exists(image_dir):
             os.makedirs(image_dir)
         save_path = os.path.join(image_dir, filename)
         # Save the file
         image.save(save_path)
         # Update the path to match the format used in the application
-        coach["path"] = f"images/{filename}"
+        coach["path"] = f"uploads/{filename}"
     save_coach(coach)
     tab = request.args.get('tab', 'sendNow')
     return redirect(url_for("admin", tab=tab))
