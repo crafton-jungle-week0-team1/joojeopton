@@ -9,16 +9,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         $(document).ready(function () {
-            // 탭 기능은 유지
-            // 초기 탭 설정 (슬랙 발송 옵션이 기본 선택됨)
-            $(".tab-content").addClass("hidden");
-            $("#sendNow").removeClass("hidden"); // 기본 활성화
-            $(".tab-btn").removeClass("border-blue-500 text-blue-500");
-            $(".tab-btn[data-tab='sendNow']").addClass(
-                "border-blue-500 text-blue-500"
-            );
+            // URL 파라미터 또는 기본값으로 탭 상태를 초기화합니다.
+            let activeTab = "{{ active_tab | default('sendNow', true) }}";
 
-            // 탭 변경 이벤트
+            // 모든 탭 콘텐츠를 숨기고 활성 탭만 표시합니다.
+            $(".tab-content").addClass("hidden");
+            $("#" + activeTab).removeClass("hidden");
+
+            // 모든 탭 버튼의 활성 스타일을 제거하고, 활성 탭에만 스타일을 적용합니다.
+            $(".tab-btn").removeClass("border-blue-500 text-blue-500");
+            $(`.tab-btn[data-tab='${activeTab}']`).addClass("border-blue-500 text-blue-500");
+
+            // 탭 버튼 클릭 이벤트
             $(".tab-btn").click(function () {
                 let targetTab = $(this).data("tab");
 
@@ -119,7 +121,7 @@
 
             <!-- 대상 관리 -->
             <div id="character" class="tab-content hidden">
-                <form action="/admin/save-coach" method="post" enctype="multipart/form-data">
+                <form action="/admin/save-coach?tab=character" method="post" enctype="multipart/form-data">
                     <label class="block text-sm font-medium text-gray-600">이름</label>
                     <input type="text" name="name" class="w-full p-2 border rounded-lg mt-1"
                         placeholder="띄어쓰기 없이 입력해 주세요." />
@@ -143,7 +145,7 @@
                             <img src="{{ url_for('static', filename=coach.path) }}" alt="{{coach.name}}"
                                 class="w-12 h-12 rounded-full" />
                             <span class="ml-4 text-lg font-semibold">{{coach.name}}</span>
-                            <form action="/admin/delete-coach" method="post" class="ml-auto">
+                            <form action="/admin/delete-coach?tab=character" method="post" class="ml-auto">
                                 <input type="hidden" name="coach_id" value="{{coach.id}}">
                                 <button type="submit"
                                     class="px-2 py-1 text-white bg-red-500 rounded-lg hover:bg-red-600">삭제</button>
@@ -156,26 +158,7 @@
 
                 <script>
                     $(document).ready(function () {
-                        // 초기 탭 설정 (슬랙 발송 옵션이 기본 선택됨)
-                        $(".tab-content").addClass("hidden");
-                        $("#sendNow").removeClass("hidden"); // 기본 활성화
-                        $(".tab-btn").removeClass("border-blue-500 text-blue-500");
-                        $(".tab-btn[data-tab='sendNow']").addClass(
-                            "border-blue-500 text-blue-500"
-                        );
-
-                        // 탭 변경 이벤트
-                        $(".tab-btn").click(function () {
-                            let targetTab = $(this).data("tab");
-
-                            // 모든 콘텐츠 숨기기
-                            $(".tab-content").addClass("hidden");
-                            $("#" + targetTab).removeClass("hidden");
-
-                            // 탭 스타일 변경
-                            $(".tab-btn").removeClass("border-blue-500 text-blue-500");
-                            $(this).addClass("border-blue-500 text-blue-500");
-                        });
+                        
 
                         // 슬랙 즉시 발송 버튼
                         $("#sendNow-btn").click(function () {

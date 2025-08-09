@@ -102,7 +102,8 @@ def save_coach_route():
         # Update the path to match the format used in the application
         coach["path"] = f"images/{filename}"
     save_coach(coach)
-    return redirect(url_for("admin"))
+    tab = request.args.get('tab', 'sendNow')
+    return redirect(url_for("admin", tab=tab))
 
 
 @app.route('/admin/delete-coach', methods=['POST'])
@@ -112,7 +113,8 @@ def delete_coach():
     if user_id not in ADMIN_LIST:
         return redirect(url_for("home"))
     db.coaches.delete_one({"_id": ObjectId(coach_id)})
-    return redirect(url_for("admin"))
+    tab = request.args.get('tab', 'sendNow')
+    return redirect(url_for("admin", tab=tab))
 
 
 @app.route('/', methods=['GET'])  # 인덱스 페이지
@@ -358,7 +360,8 @@ def admin():
     coaches = list(db.coaches.find())
     for coach in coaches:
         coach["id"] = str(coach["_id"])
-    return render_template("admin.html", coaches=coaches)
+    tab = request.args.get('tab', 'sendNow')
+    return render_template("admin.html", coaches=coaches, active_tab=tab)
 
 
 # 슬랙 메세지 전송 시간 설정
