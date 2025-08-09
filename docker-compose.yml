@@ -1,7 +1,6 @@
-version: "3.9"
-
 services:
   app:
+    build: .    # 도커파일로 직접 빌드
     image: juniperjeong/joojeobton:latest   # Actions가 푸시한 이미지 사용
     container_name: joojeopton-container
     env_file:
