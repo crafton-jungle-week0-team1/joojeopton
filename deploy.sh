@@ -7,11 +7,11 @@ echo "🚀 joojeopton 배포 시작..."
 # Docker 및 Docker Compose 설치 확인
 if ! command -v docker &> /dev/null; then
     echo "Docker 설치 중..."
-    sudo yum update -y
-    sudo yum install -y docker
+    sudo apt update
+    sudo apt install -y docker.io
     sudo systemctl start docker
     sudo systemctl enable docker
-    sudo usermod -a -G docker ec2-user
+    sudo usermod -a -G docker ubuntu
 fi
 
 if ! command -v docker-compose &> /dev/null; then
