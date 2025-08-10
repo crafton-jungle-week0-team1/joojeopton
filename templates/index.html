@@ -137,13 +137,13 @@
         </div>
     </div>
 
-    <div class="container grid grid-cols-2 divide-x-2">
-        <div class="container profile p-10 grid grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 divide-x-2">
+        <div class="container profile p-10 grid grid-cols-4 gap-x-4 gap-y-1 col-span-1">
             <!-- 프로필 예시 -->
             {% for coach in coaches %}
             <div class="profile flex flex-col items-center">
                 <img src="{{ url_for('static', filename=coach.path) }}" alt="image" class="mb-4"
-                    style="width: 100px; height: 125px; object-fit: cover;">
+                    style="width: 220px; height: 280px; object-fit: cover;">
                 <button class="bg-white border border-blue-300 text-blue-400 hover:bg-blue-50 p-2 block mx-auto"
                     id="btn-{{coach.id}}" onclick="location.href='joojeop/{{ coach.id }}'"> {{ coach.name }} 
                     주접떨기</button>
@@ -152,16 +152,16 @@
 
 
         </div>
-        <div class="container p-5">
+        <div class="container p-10 col-span-1">
             <button
-                class="all-joojeop-btn px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">모든주접</button>
+                class="all-joojeop-btn px-4 py-2 text-s border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">모든주접</button>
             <button
-                class="my-joojeop-btn px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">내주접</button>
+                class="my-joojeop-btn px-4 py-2 text-s border rounded-full bg-gray-100 hover:bg-sky-100 focus:bg-sky-500 focus:text-white">내주접</button>
             <!-- 드롭다운 컨테이너 -->
             <div id="dropdownContainer" class="relative inline-block">
                 <!-- 드롭다운 버튼 -->
                 <button id="dropdownButton"
-                    class="px-2 py-1 text-xs border rounded-full bg-gray-100 hover:bg-sky-100 flex items-center">
+                    class="px-4 py-2 text-s border rounded-full bg-gray-100 hover:bg-sky-100 flex items-center">
                     정렬
                     <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                         xmlns="http://www.w3.org/2000/svg">
@@ -182,9 +182,9 @@
 
             <!-- 주접문 블록 예시 -->
             <!-- Scrollable area for joojeop posts -->
-            <div class="mt-4 overflow-y-auto" style="max-height: 70vh;">
+            <div class="mt-2 overflow-y-auto" style="max-height: 70vh;">
                 {% for joojeop in joojeops %}
-                <div class="joojeop-block border m-5 p-5">
+                <div class="joojeop-block border mt-5 p-5">
                     <p class="joojeop-content">{{ joojeop.content}}</p>
                     <div class="flex items-center space-x-3 text-gray-500 mt-2">
                         <span class="joojeop-creater">by. {{ joojeop.author_name}}</span>

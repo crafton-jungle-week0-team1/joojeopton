@@ -58,19 +58,6 @@ github_bp = make_github_blueprint(
 app.register_blueprint(github_bp, url_prefix="/login")
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET")
 
-# # 코치 DB, 픽스 값으로 유지
-# coaches = [
-#     {"name": "김정민", "path": "images/1.png", "id": "1"},
-#     {"name": "김현수", "path": "images/2.png", "id": "2"},
-#     {"name": "방효식", "path": "images/3.png", "id": "3"},
-#     {"name": "백승현", "path": "images/4.png", "id": "4"},
-#     {"name": "안예인", "path": "images/5.png", "id": "5"},
-#     {"name": "유윤선", "path": "images/6.png", "id": "6"},
-#     {"name": "이동석", "path": "images/7.png", "id": "7"},
-#     {"name": "이승민", "path": "images/8.png", "id": "8"},
-# ]
-
-
 def save_coach(coach):
     db.coaches.insert_one(coach)
 # 맨 처음 접속하면 띄워지는 페이지. 모든 코치진의 사진과 이름을 보여준다.
